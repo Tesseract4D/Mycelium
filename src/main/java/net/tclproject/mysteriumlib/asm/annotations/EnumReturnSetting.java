@@ -1,6 +1,8 @@
 package net.tclproject.mysteriumlib.asm.annotations;
 
-/** Determines if return gets called after a fix method. */
+/**
+ * Determines if return gets called after a fix method.
+ */
 public enum EnumReturnSetting {
 
     /**

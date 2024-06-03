@@ -1,10 +1,10 @@
 package net.tclproject.mysteriumlib.asm.core;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class that allows to create Types out of different input data.
@@ -12,7 +12,7 @@ import org.objectweb.asm.Type;
  */
 public class TypeUtils {
 
-    private static final Map<String, Type> primitives = new HashMap<String, Type>(9);
+    private static final Map<String, Type> primitives = new HashMap<>(9);
 
     /**
      * Creates a Type based on the name of the class or primitive.
@@ -68,10 +68,8 @@ public class TypeUtils {
      * @return the corresponding type in the format used by StackMapTable frames.
      */
     public static Object getStackMapFormat(Type type) {
-        if (type == Type.BOOLEAN_TYPE || type == Type.BYTE_TYPE
-            || type == Type.SHORT_TYPE
-            || type == Type.CHAR_TYPE
-            || type == Type.INT_TYPE) {
+        if (type == Type.BOOLEAN_TYPE || type == Type.BYTE_TYPE || type == Type.SHORT_TYPE ||
+            type == Type.CHAR_TYPE || type == Type.INT_TYPE) {
             return Opcodes.INTEGER;
         }
         if (type == Type.FLOAT_TYPE) {

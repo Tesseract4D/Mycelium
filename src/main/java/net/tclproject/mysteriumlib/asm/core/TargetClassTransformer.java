@@ -1,123 +1,93 @@
 package net.tclproject.mysteriumlib.asm.core;
 
+import net.tclproject.mysteriumlib.asm.core.MiscUtils.LogHelper;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import net.tclproject.mysteriumlib.asm.core.MiscUtils.LogHelper;
-import net.tclproject.mysteriumlib.asm.core.MiscUtils.SystemLogHelper;
-
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-
 /**
- * Class that processes byte[] classes, to be integrated with IFMLLoadingPlugin to get classes passed into transform
- * method.
+ * Class that processes byte[] classes, to be integrated with IFMLLoadingPlugin to get classes passed into transform method.
  */
 public class TargetClassTransformer {
-
-    /** Instance of MiscUtils needed in order to make a logger. */
+    /**
+     * Instance of MiscUtils needed in order to make a logger.
+     */
     MiscUtils utils = new MiscUtils();
-    /** System logger that this class uses (messages will only appear in console, to my knowledge.) */
+    /**
+     * System logger that this class uses (messages will only appear in console, to my knowledge.)
+     */
     public LogHelper logger = utils.new SystemLogHelper();
-    /** Map of "target class name":"List of ASMFix/es to be applied". */
-    protected HashMap<String, List<ASMFix>> fixesMap = new HashMap<String, List<ASMFix>>();
-    /** Class that will parse the fix class and methods. */
+    /**
+     * Map of "target class name":"List of ASMFix/es to be applied".
+     */
+    protected HashMap<String, List<ASMFix>> fixesMap = new HashMap<>();
+    /**
+     * Class that will parse the fix class and methods.
+     */
     private FixParser containerParser = new FixParser(this);
-    /** MetaReader instance used. */
+    /**
+     * MetaReader instance used.
+     */
     protected MetaReader metaReader = new MetaReader();
 
-    /** Adds a fix to the list to be inserted. */
+    /**
+     * Adds a fix to the list to be inserted.
+     */
     public void registerFix(ASMFix fix) {
         if (fixesMap.containsKey(fix.getTargetClassName())) {
-            fixesMap.get(fix.getTargetClassName())
-                .add(fix); // If a class is already to be transformed, we just add one more fix to it.
+            fixesMap.get(fix.getTargetClassName()).add(fix); // If a class is already to be transformed, we just add one more fix to it.
         } else { // If the class doesn't exist in the list to have a fix applied to.
-            List<ASMFix> list = new ArrayList<ASMFix>(2); // Create a new list of fixes to be applied to the class.
+            List<ASMFix> list = new ArrayList<>(2); // Create a new list of fixes to be applied to the class.
             list.add(fix); // Add this fix to the list.
             fixesMap.put(fix.getTargetClassName(), list); // Put the class and the list of fixes for it into the map.
         }
     }
 
-    /** Registers the class with all the fix methods. */
+    /**
+     * Registers the class with all the fix methods.
+     */
     public void registerClassWithFixes(String className) {
         containerParser.parseForFixes(className);
     }
 
-    /** Registers the class with all the fix methods. */
+    /**
+     * Registers the class with all the fix methods.
+     */
     public void registerClassWithFixes(byte[] classBytes) {
         containerParser.parseForFixes(classBytes);
     }
 
-    /** Takes the original bytecode of a class and returns the modified version of it with fixes applied. */
+    /**
+     * Takes the original bytecode of a class and returns the modified version of it with fixes applied.
+     */
     public byte[] transform(String className, byte[] classBytes) {
         List<ASMFix> fixes = fixesMap.get(className); // gets the fixes for the class
-        // gets the fixes incl. 'dynamic' ones for the class
-        List<ASMFix> extendedFixes = new ArrayList<ASMFix>();
-        ArrayList<String> superclasses = metaReader.getSuperClasses(className);
-
-        superclasses.remove(className);
-        if (superclasses != null) {
-            for (String superclass : superclasses) {
-                List<ASMFix> localfixes = fixesMap.get(superclass.replace('/', '.')); // gets the fixes for the class
-
-                if (localfixes != null) {
-                    for (ASMFix localfix : localfixes) {
-                        if (localfix.allThatExtend) extendedFixes.add(localfix);
-                    }
-                }
-            }
-        }
-
-        if (extendedFixes.size() == 0) extendedFixes = null;
-        if (extendedFixes != null) {
-            if (fixes == null) fixes = new ArrayList<ASMFix>();
-            fixes.addAll(extendedFixes);
-        }
 
         if (fixes != null) { // if there are any
             Collections.sort(fixes); // sort fixes using method inside ASMFix
             logger.debug("Injecting fixes into class " + className + ".");
             try {
                 /*
-                 * Starting with java 7, the process of bytecode verification got changed pretty drastically.
-                 * Because of this, we have to turn on the automatic generation of stack map frames.
-                 * On older versions of java, this is just a waste of time.
-                 * More details here: http://stackoverflow.com/questions/25109942
-                 */
+                 Starting with java 7, the process of bytecode verification got changed pretty drastically.
+                 Because of this, we have to turn on the automatic generation of stack map frames.
+                 On older versions of java, this is just a waste of time.
+                 More details here: http://stackoverflow.com/questions/25109942
+                */
 
                 // Some random java version verification algorithm from google
                 int javaVersion = ((classBytes[6] & 0xFF) << 8) | (classBytes[7] & 0xFF);
                 boolean java7 = javaVersion > 50;
 
                 ClassReader classReader = new ClassReader(classBytes);
-                ClassWriter classWriter = createClassWriter(
-                    java7 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS); // If java is 7+, compute frames, if
-                                                                                    // not, set everything to max
-                                                                                    // possible
+                ClassWriter classWriter = createClassWriter(java7 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS); // If java is 7+, compute frames, if not, set everything to max possible
                 FixInserterClassVisitor fixInserterVisitor = createInserterClassVisitor(classWriter, fixes);
-                classReader.accept(fixInserterVisitor, java7 ? ClassReader.SKIP_FRAMES : ClassReader.EXPAND_FRAMES); // Make
-                                                                                                                     // the
-                                                                                                                     // fix
-                                                                                                                     // inserter
-                                                                                                                     // class
-                                                                                                                     // visitor
-                                                                                                                     // run
-                                                                                                                     // through
-                                                                                                                     // the
-                                                                                                                     // methods
-                                                                                                                     // and
-                                                                                                                     // return
-                                                                                                                     // fix
-                                                                                                                     // inserter
-                                                                                                                     // method
-                                                                                                                     // visitors
+                classReader.accept(fixInserterVisitor, java7 ? ClassReader.SKIP_FRAMES : ClassReader.EXPAND_FRAMES); // Make the fix inserter class visitor run through the methods and return fix inserter method visitors
 
-                // Chain: register class with fix methods -> parse the class for fix methods and add them to the list to
-                // be inserted -> make custom class visitor -> visit target class and return custom method visitors that
-                // will be executed -> custom method visitors call ASMFix method to insert fixes from the list -> ASMFix
-                // inserts the fixes
+                // Chain: register class with fix methods -> parse the class for fix methods and add them to the list to be inserted -> make custom class visitor -> visit target class and return custom method visitors that will be executed -> custom method visitors call ASMFix method to insert fixes from the list -> ASMFix inserts the fixes
 
                 classBytes = classWriter.toByteArray(); // Overwrite the class bytes with the new class bytes
 
@@ -125,12 +95,7 @@ public class TargetClassTransformer {
                     logger.debug("Fixed method " + fix.getFullTargetMethodName());
                 } // Print out all fixed methods
 
-                for (ASMFix fix : fixInserterVisitor.insertedFixesExtended) {
-                    logger.debug("Fixed method (using dynamic patch) " + fix.getFullTargetMethodName());
-                } // Print out all fixed methods
-
-                fixes.removeAll(fixInserterVisitor.insertedFixes); // remove inserted fixes from the list of fixes to be
-                                                                   // inserted
+                fixes.removeAll(fixInserterVisitor.insertedFixes); // remove inserted fixes from the list of fixes to be inserted
 
             } catch (Exception e) {
                 logger.severe("A problem has occurred during transformation of class " + className + ".");
@@ -141,14 +106,11 @@ public class TargetClassTransformer {
                 logger.severe("Stack trace:", e);
             }
 
-            for (ASMFix notInserted : fixes) { // since inserted fixes get removed, we can just iterate through ones
-                                               // left
+            for (ASMFix notInserted : fixes) { // since inserted fixes get removed, we can just iterate through ones left
                 if (notInserted.isMandatory()) {
                     throw new RuntimeException("Can not find the target method of fatal fix: " + notInserted);
                 } else {
-                    if (!notInserted.allThatExtend) {
-                        logger.warning("Can not find the target method of fix: " + notInserted);
-                    }
+                    logger.warning("Can not find the target method of fix: " + notInserted);
                 }
             }
         }
@@ -160,8 +122,8 @@ public class TargetClassTransformer {
      * This method can be overridden, if inside the ClassVisitor, custom logic is needed to check if
      * the methods are the target methods.
      *
-     * @param classWriter ClassWriter, that needs to save the changes
-     * @param fixes       List of fixes inserted into the target class
+     * @param cw    ClassWriter, that needs to save the changes
+     * @param fixes List of fixes inserted into the target class
      * @return ClassVisitor that returns the custom method visitors
      */
     public FixInserterClassVisitor createInserterClassVisitor(ClassWriter classWriter, List<ASMFix> fixes) {

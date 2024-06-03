@@ -1,5 +1,10 @@
 package net.tclproject.mysteriumlib.asm.core;
 
+import cpw.mods.fml.common.FMLLog;
+import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.Level;
+import org.objectweb.asm.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -7,16 +12,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.Level;
-import org.objectweb.asm.*;
-
-import cpw.mods.fml.common.FMLLog;
-
-/** Utilities for getting information out of classes and methods and performing basic tasks on them. */
+/**
+ * Utilities for getting information out of classes and methods and performing basic tasks on them.
+ */
 public class MetaReader {
 
-    /** The findLoadedClass method inside the ClassLoader class. */
+    /**
+     * The findLoadedClass method inside the ClassLoader class.
+     */
     private static Method findLoadedClass;
 
     static {
@@ -24,19 +27,14 @@ public class MetaReader {
             findLoadedClass = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
             findLoadedClass.setAccessible(true);
         } catch (NoSuchMethodException e) {
-            FMLLog.log(
-                "Mysterium Patches",
-                Level.ERROR,
-                "Error occured when making findLoadedClass in ClassLoader usable.");
-            FMLLog.log(
-                "Mysterium Patches",
-                Level.ERROR,
-                "THIS IS MOST LIKELY HAPPENING BECAUSE OF MOD CONFLICTS. PLEASE CONTACT ME TO LET ME KNOW.");
+            FMLLog.log("Mysterium Patches", Level.ERROR, "Error occured when making findLoadedClass in ClassLoader usable.");
+            FMLLog.log("Mysterium Patches", Level.ERROR, "THIS IS MOST LIKELY HAPPENING BECAUSE OF MOD CONFLICTS. PLEASE CONTACT ME TO LET ME KNOW.");
             FMLLog.log("Mysterium Patches", Level.ERROR, e.getMessage());
         }
     }
 
     // TODO: test a static method
+
     /**
      * Gets a list of local variables (index: , type, name) in a method.
      *
@@ -46,28 +44,20 @@ public class MetaReader {
      * @return a list of local variables.
      */
     public List<String> getLocalVariables(byte[] classBytes, final String methodName, Type... argumentTypes) {
-        final List<String> localVariables = new ArrayList<String>();
-        String methodDescriptor = Type.getMethodDescriptor(Type.VOID_TYPE, argumentTypes); // We don't actually use the
-                                                                                           // return type, hence the
-                                                                                           // next variable
+        final List<String> localVariables = new ArrayList<>();
+        String methodDescriptor = Type.getMethodDescriptor(Type.VOID_TYPE, argumentTypes); // We don't actually use the return type, hence the next variable
         final String methodDescriptorWithoutReturnType = methodDescriptor.substring(0, methodDescriptor.length() - 1);
 
         ClassVisitor classVisitor = new ClassVisitor(Opcodes.ASM5) {
 
             @Override
-            public MethodVisitor visitMethod(final int access, String name, String descriptor, String signature,
-                String[] exceptions) {
+            public MethodVisitor visitMethod(final int access, String name, String descriptor, String signature, String[] exceptions) {
                 if (methodName.equals(name) && descriptor.startsWith(methodDescriptorWithoutReturnType)) {
                     return new MethodVisitor(Opcodes.ASM5) {
-
                         @Override
-                        public void visitLocalVariable(String name, String descriptor, String signature, Label start,
-                            Label end, int index) {
-                            String typeName = Type.getType(descriptor)
-                                .getClassName();
-                            int fixedIndex = index + ((access & Opcodes.ACC_STATIC) == 0 ? 0 : 1); // If access is
-                                                                                                   // static, we add 1,
-                                                                                                   // if not, we add 0.
+                        public void visitLocalVariable(String name, String descriptor, String signature, Label start, Label end, int index) {
+                            String typeName = Type.getType(descriptor).getClassName();
+                            int fixedIndex = index + ((access & Opcodes.ACC_STATIC) == 0 ? 0 : 1); // If access is static, we add 1, if not, we add 0.
                             localVariables.add(fixedIndex + ": " + typeName + " " + name);
                         }
                     };
@@ -88,8 +78,7 @@ public class MetaReader {
      * @param argumentTypes the types of the arguments in the method, represented by Type instances.
      * @return a list of local variables.
      */
-    public List<String> getLocalVariables(String className, final String methodName, Type... argTypes)
-        throws IOException {
+    public List<String> getLocalVariables(String className, final String methodName, Type... argTypes) throws IOException {
         return getLocalVariables(classToBytes(className), methodName, argTypes);
     }
 
@@ -118,6 +107,7 @@ public class MetaReader {
         printLocalVariables(classToBytes(className), methodName, argumentTypes);
     }
 
+
     /**
      * Gets the passed in class in an InputStream.
      *
@@ -139,6 +129,7 @@ public class MetaReader {
         String classLocationName = '/' + name.replace('.', '/') + ".class";
         return IOUtils.toByteArray(MetaReader.class.getResourceAsStream(classLocationName));
     }
+
 
     /**
      * Makes the given visitor visit the Java class.
@@ -186,8 +177,7 @@ public class MetaReader {
      */
     public MethodReference findMethod(String owner, String methodName, String descriptor) {
         ArrayList<String> superClasses = getSuperClasses(owner);
-        for (int i = superClasses.size() - 1; i > 0; i--) { // There is no use in checking the current class, for that
-                                                            // we have getMethodReference.
+        for (int i = superClasses.size() - 1; i > 0; i--) { // There is no use in checking the current class, for that we have getMethodReference.
             String className = superClasses.get(i);
             MethodReference methodReference = getMethodReference(className, methodName, descriptor);
             if (methodReference != null) {
@@ -221,8 +211,7 @@ public class MetaReader {
      * @param descriptor the descriptor of the method.
      * @return a MethodReference.
      */
-    public MethodReference getMethodReferenceASM(String className, String methodName, String descriptor)
-        throws IOException {
+    public MethodReference getMethodReferenceASM(String className, String methodName, String descriptor) throws IOException {
         FindMethodClassVisitor cv = new FindMethodClassVisitor(methodName, descriptor);
         acceptVisitor(className, cv);
         if (cv.found) {
@@ -269,10 +258,10 @@ public class MetaReader {
      *
      * @param name full class path without ".class".
      * @return superclasses in order of increasing specificity (starting with java/lang/Object
-     *         and ending with the name passed in)
+     * and ending with the name passed in)
      */
     public ArrayList<String> getSuperClasses(String name) {
-        ArrayList<String> superClasses = new ArrayList<String>(1);
+        ArrayList<String> superClasses = new ArrayList<>(1);
         superClasses.add(name);
 
         // Loop that iterates over all super classes, getting super class of super class of super class etc
@@ -299,10 +288,7 @@ public class MetaReader {
                 return (Class) findLoadedClass.invoke(classLoader, name.replace('/', '.'));
             } catch (Exception e) {
                 FMLLog.log("Mysterium Patches", Level.ERROR, "Error occured when getting a class from a name.");
-                FMLLog.log(
-                    "Mysterium Patches",
-                    Level.ERROR,
-                    "THIS IS MOST LIKELY HAPPENING BECAUSE OF MOD CONFLICTS. PLEASE CONTACT ME TO LET ME KNOW.");
+                FMLLog.log("Mysterium Patches", Level.ERROR, "THIS IS MOST LIKELY HAPPENING BECAUSE OF MOD CONFLICTS. PLEASE CONTACT ME TO LET ME KNOW.");
                 FMLLog.log("Mysterium Patches", Level.ERROR, e.getMessage());
             }
         }
@@ -345,17 +331,19 @@ public class MetaReader {
         Class loadedClass = getLoadedClass(name);
         if (loadedClass != null) {
             if (loadedClass.getSuperclass() == null) return null;
-            return loadedClass.getSuperclass()
-                .getName()
-                .replace('.', '/');
+            return loadedClass.getSuperclass().getName().replace('.', '/');
         }
         return "java/lang/Object";
     }
 
-    /** Custom class visitor that stores the superclass name. */
+    /**
+     * Custom class visitor that stores the superclass name.
+     */
     protected class CheckSuperClassVisitor extends ClassVisitor {
 
-        /** Name of superclass */
+        /**
+         * Name of superclass
+         */
         String superClassName;
 
         public CheckSuperClassVisitor() {
@@ -364,13 +352,14 @@ public class MetaReader {
         }
 
         @Override
-        public void visit(int version, int access, String name, String signature, String superName,
-            String[] interfaces) {
+        public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
             this.superClassName = superName;
         }
     }
 
-    /** Custom class visitor that finds a method in a class. */
+    /**
+     * Custom class visitor that finds a method in a class.
+     */
     protected class FindMethodClassVisitor extends ClassVisitor {
 
         public String targetName;
@@ -384,13 +373,10 @@ public class MetaReader {
         }
 
         @Override
-        public MethodVisitor visitMethod(int access, String name, String desctiptor, String signature,
-            String[] exceptions) {
+        public MethodVisitor visitMethod(int access, String name, String desctiptor, String signature, String[] exceptions) {
 
-            // Check ofr if access is public (01(public),10(private),11(protected) & 10 will only be 00 if it's 01) and
-            // it's the same method you're looking for.
-            if ((access & Opcodes.ACC_PRIVATE) == 0
-                && checkSameMethod(name, desctiptor, targetName, targetDescriptor)) {
+            // Check ofr if access is public (01(public),10(private),11(protected) & 10 will only be 00 if it's 01) and it's the same method you're looking for.
+            if ((access & Opcodes.ACC_PRIVATE) == 0 && checkSameMethod(name, desctiptor, targetName, targetDescriptor)) {
                 found = true;
                 targetName = name;
                 targetDescriptor = desctiptor;
@@ -399,16 +385,24 @@ public class MetaReader {
         }
     }
 
-    /** Helper class that stores a method reference. */
+    /**
+     * Helper class that stores a method reference.
+     */
     public static class MethodReference {
 
-        /** Class that contains the said method. */
+        /**
+         * Class that contains the said method.
+         */
         public final String owner;
 
-        /** The method name. */
+        /**
+         * The method name.
+         */
         public final String name;
 
-        /** The method descriptor. */
+        /**
+         * The method descriptor.
+         */
         public final String descriptor;
 
         public MethodReference(String owner, String name, String descriptor) {
@@ -417,23 +411,20 @@ public class MetaReader {
             this.descriptor = descriptor;
         }
 
-        /** Gets the return type of the method. */
+        /**
+         * Gets the return type of the method.
+         */
         public Type getReturnType() {
             return Type.getMethodType(descriptor);
         }
 
         @Override
         public String toString() {
-            return "MethodReference{" + "owner='"
-                + owner
-                + '\''
-                + ", name='"
-                + name
-                + '\''
-                + ", desc='"
-                + descriptor
-                + '\''
-                + '}';
+            return "MethodReference{" +
+                "owner='" + owner + '\'' +
+                ", name='" + name + '\'' +
+                ", desc='" + descriptor + '\'' +
+                '}';
         }
     }
 }

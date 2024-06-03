@@ -1,5 +1,12 @@
 package net.tclproject.mysteriumlib.asm.annotations;
 
+// TODO: Add this everywhere
+/* Copyright TCLProject - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by TCLProject <endermcraftmail@gmail.com>, December 2020
+ */
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 
@@ -31,8 +38,7 @@ public @interface Fix {
 
     /**
      * Specifies when the fix method will be called.
-     * FIRST will be inserted first, LAST will be inserted last therefore will be the actual first/last set of
-     * instructions.
+     * FIRST will be inserted first, LAST will be inserted last therefore will be the actual first/last set of instructions.
      */
     FixOrder order() default FixOrder.USUAL;
 
@@ -53,11 +59,11 @@ public @interface Fix {
      * (for example, ProGuard can make such methods while obfuscating).
      * If the return type isn't specified, the fix will be applied to the first method
      * that matches the name and arguments.
-     *
+     * <p>
      * The main proposed use of this parameter is with createMethod = true.
      * The created method will by default have the same return type as the fix method,
      * but you can change that with this parameter.
-     *
+     * <p>
      * You need to specify the full name of the class: java.lang.String, void, int etc.
      */
     String returnedType() default "";
@@ -65,10 +71,10 @@ public @interface Fix {
     /**
      * Allows not only to insert fixes into already existing methods, but also add new ones. This can be useful,
      * if you need to override a method of the superclass. Doesn't actually add anything inside the target method except
-     * for a super call (if possible) and a return statement, so you have to insert a fix into the created method to add
-     * some functionality.
+     * for a super call (if possible) and a return statement, so you have to insert a fix into the created method to add some functionality.
      */
     boolean createNewMethod() default false;
+
 
     /**
      * Allows to make the fix mandatory for the game to launch. If the insertion of the fix fails,
@@ -83,14 +89,6 @@ public @interface Fix {
     boolean insertOnExit() default false;
 
     /**
-     * Instead of applying the fix only to the target class,
-     * applies the fix to all classes that extend the target class as well.
-     * Word of warning: 'dynamic' fixes like this HAVE to be non-fatal because they will inevitably
-     * fail on some class if the class does not have the target method overridden.
-     */
-    boolean allThatExtend() default false;
-
-    /**
      * By default, the fix is inserted into the beginning of the target method.
      * If you set this, it will be inserted at the said line.
      * The use of this is NOT recommended because it can break very easily,
@@ -98,8 +96,7 @@ public @interface Fix {
      * <p/>
      * NOTE: the line numbers in mcp and in minecraft are sometimes different, beware.
      */
-    @Deprecated
-    int insertOnLine() default -1;
+    @Deprecated int insertOnLine() default -1;
 
     /**
      * If you specify this name, when return will be called in the target method, this method will be called.

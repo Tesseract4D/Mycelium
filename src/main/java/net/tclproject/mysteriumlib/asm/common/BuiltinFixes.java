@@ -1,11 +1,12 @@
 package net.tclproject.mysteriumlib.asm.common;
 
+import cpw.mods.fml.common.Loader;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.tclproject.mysteriumlib.asm.annotations.Fix;
 
-import cpw.mods.fml.common.Loader;
-
-/** Contails built-in fixes. */
+/**
+ * Contails built-in fixes.
+ */
 public class BuiltinFixes {
 
     /**
@@ -21,8 +22,7 @@ public class BuiltinFixes {
         if (classLoader instanceof LaunchClassLoader) {
             ((LaunchClassLoader) classLoader).registerTransformer(CustomClassTransformer.class.getName());
         } else {
-            System.out.println(
-                "MysteriumASM Lib was not loaded by LaunchClassLoader. Fixes for minecraft code will not have any effect.");
+            System.out.println("MysteriumASM Lib was not loaded by LaunchClassLoader. Fixes for minecraft code will not have any effect.");
         }
     }
 

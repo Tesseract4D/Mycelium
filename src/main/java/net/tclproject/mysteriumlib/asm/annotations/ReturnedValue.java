@@ -9,4 +9,5 @@ import java.lang.annotation.Target;
  * Can only use if injectOnExit() == true and the target method doesn't return void.
  */
 @Target(ElementType.PARAMETER)
-public @interface ReturnedValue {}
+public @interface ReturnedValue {
+}

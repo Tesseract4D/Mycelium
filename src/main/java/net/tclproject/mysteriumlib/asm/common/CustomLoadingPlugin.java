@@ -1,40 +1,49 @@
 package net.tclproject.mysteriumlib.asm.common;
 
+import cpw.mods.fml.common.FMLLog;
+import cpw.mods.fml.common.asm.transformers.DeobfuscationTransformer;
+import cpw.mods.fml.relauncher.CoreModManager;
+import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import net.tclproject.mysteriumlib.asm.core.ASMFix;
+import net.tclproject.mysteriumlib.asm.core.MetaReader;
+import net.tclproject.mysteriumlib.asm.core.TargetClassTransformer;
+import org.apache.logging.log4j.Level;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
-
-import net.tclproject.mysteriumlib.asm.core.ASMFix;
-import net.tclproject.mysteriumlib.asm.core.MetaReader;
-import net.tclproject.mysteriumlib.asm.core.TargetClassTransformer;
-
-import org.apache.logging.log4j.Level;
-
-import cpw.mods.fml.common.FMLLog;
-import cpw.mods.fml.common.asm.transformers.DeobfuscationTransformer;
-import cpw.mods.fml.relauncher.CoreModManager;
-import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import java.util.logging.Logger;
 
 /**
  * Custom IFMLLoadingPlugin implementation.
- * 
+ *
  * @see IFMLLoadingPlugin
  */
-@IFMLLoadingPlugin.TransformerExclusions({ "net.tclproject" })
+@IFMLLoadingPlugin.TransformerExclusions({"net.tclproject"})
 public class CustomLoadingPlugin implements IFMLLoadingPlugin {
 
-    /** A DeobfuscationTransformer instance for use inside this class. */
+    /**
+     * A DeobfuscationTransformer instance for use inside this class.
+     */
     private static DeobfuscationTransformer deobfuscationTransformer;
-    /** If we have checked if we're running inside an obfuscated environment. */
+    /**
+     * If we have checked if we're running inside an obfuscated environment.
+     */
     private static boolean checkedObfuscation;
-    /** If we're running inside an obfuscated environment. */
+    /**
+     * If we're running inside an obfuscated environment.
+     */
     private static boolean obfuscated;
-    /** A Metadata Reader instance for use inside this class. */
+    /**
+     * A Metadata Reader instance for use inside this class.
+     */
     private static MetaReader mcMetaReader;
 
     public static boolean foundThaumcraft = false;
+    private static boolean foundOptiFine = false;
+    private static boolean confirmedOptiFine = false;
     public static boolean foundDragonAPI = false;
     public static boolean isDevEnvironment = false;
 
@@ -47,12 +56,12 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
     /**
      * Returns the transformer that we are using at the current moment in time to modify classes.
      * See why we have to use two separate ones in the documentation for FirstClassTransformer.
-     * 
+     *
      * @return FirstClassTransformer if our built-in fixes haven't been applied, otherwise - CustomClassTransformer.
      */
     public static TargetClassTransformer getTransformer() {
-        return FirstClassTransformer.instance.registeredBuiltinFixes ? CustomClassTransformer.instance
-            : FirstClassTransformer.instance;
+        return FirstClassTransformer.instance.registeredBuiltinFixes ?
+            CustomClassTransformer.instance : FirstClassTransformer.instance;
     }
 
     /**
@@ -65,12 +74,16 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
         getTransformer().registerFix(fix);
     }
 
-    /** Registers all fix methods within a class. */
+    /**
+     * Registers all fix methods within a class.
+     */
     public static void registerClassWithFixes(String className) {
         getTransformer().registerClassWithFixes(className);
     }
 
-    /** Getter for mcMetaReader. */
+    /**
+     * Getter for mcMetaReader.
+     */
     public static MetaReader getMetaReader() {
         return mcMetaReader;
     }
@@ -85,7 +98,7 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
     /**
      * If the obfuscation has not yet been checked, checks and returns it.
      * If it has, returns the value that the previous check returned.
-     * 
+     *
      * @return If the mod is run in an obfuscated environment.
      */
     public static boolean isObfuscated() {
@@ -96,10 +109,7 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
                 obfuscated = !deobfuscatedField.getBoolean(null);
             } catch (Exception e) {
                 FMLLog.log("Mysterium Patches", Level.ERROR, "Error occured when checking obfuscation.");
-                FMLLog.log(
-                    "Mysterium Patches",
-                    Level.ERROR,
-                    "THIS IS MOST LIKELY HAPPENING BECAUSE OF MOD CONFLICTS. PLEASE CONTACT ME TO LET ME KNOW.");
+                FMLLog.log("Mysterium Patches", Level.ERROR, "THIS IS MOST LIKELY HAPPENING BECAUSE OF MOD CONFLICTS. PLEASE CONTACT ME TO LET ME KNOW.");
                 FMLLog.log("Mysterium Patches", Level.ERROR, e.getMessage());
             }
             checkedObfuscation = true;
@@ -110,14 +120,16 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
     // For further methods, forge has way better documentation than what I could ever write.
 
     // Only exists in 1.7.10. Comment out if not needed.
+    @Override
     public String getAccessTransformerClass() {
-        return null;
+        return "mods.battlegear2.coremod.transformers.BattlegearAccessTransformer";
     }
 
-    // This only exists in 1.6.x. Uncomment if needed.
-    // public String[] getLibraryRequestClass() {
-    // return null;
-    // }
+
+//  This only exists in 1.6.x. Uncomment if needed.
+//  public String[] getLibraryRequestClass() {
+//      return null;
+//  }
 
     @Override
     public String[] getASMTransformerClass() {
@@ -136,11 +148,9 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
 
     @Override
     public void injectData(Map<String, Object> data) {
-        debugOutputLocation = new File(
-            data.get("mcLocation")
-                .toString(),
-            "bg edited classes");
+        debugOutputLocation = new File(data.get("mcLocation").toString(), "bg edited classes");
         if (((ArrayList) data.get("coremodList")).contains("DragonAPIASMHandler")) {
+            Logger.getGlobal().info("Core: Located DragonAPI in list of coremods");
             foundDragonAPI = true;
         }
 
@@ -148,6 +158,7 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
         // Some mods may refer to others in their name, so we'll to confirm those assumption with class presence check.
         File loc = (File) data.get("mcLocation");
 
+        Logger.getGlobal().info("MC located at: " + loc.getAbsolutePath());
         isDevEnvironment = !(Boolean) data.get("runtimeDeobfuscationEnabled");
 
         File mcFolder = new File(loc.getAbsolutePath() + File.separatorChar + "mods");
@@ -164,15 +175,23 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
             if (name != null) {
                 name = name.toLowerCase();
                 if (name.endsWith(".jar") || name.endsWith(".zip")) {
-
-                    // Can look for if certain mods are loaded here
-
+                    if (name.contains("thaumcraft")) {
+                        Logger.getGlobal().info("Core: Located Thaumcraft in " + file.getName());
+                        foundThaumcraft = true;
+                    } else if (name.contains("optifine")) {
+                        Logger.getGlobal().info("Core: Located OptiFine in " + file.getName() + ". We'll to confirm that...");
+                        foundOptiFine = true;
+                    } else if (name.contains("dragonapi")) {
+                        Logger.getGlobal().info("Core: Located DragonAPI in " + file.getName());
+                        foundDragonAPI = true;
+                    }
                 }
             }
         }
         registerFixes();
     }
 
-    public void registerFixes() {}
+    public void registerFixes() {
+    }
 
 }
