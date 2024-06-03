@@ -8,7 +8,7 @@ public class ModProperties {
     // General values
     public static final String MODID = "MysteriumLib";
     public static final String NAME = "MysteriumLib";
-    public static final String VERSION = "1.4";
+    public static final String VERSION = "1.4.1";
     public static final String MC_VERSION = "1.7.10";
     public static final String URL = "";
     public static final String VERSION_CHECKER_URL = "";
@@ -21,7 +21,7 @@ public class ModProperties {
     public static final String COLORED_VERSION = EnumChatFormatting.GRAY + VERSION;
     public static final String COLORED_URL = EnumChatFormatting.GRAY + URL;
 
-    public static final String CREDITS = EnumChatFormatting.DARK_PURPLE + "Matrix (TCLProject)" + EnumChatFormatting.RED + "HRudyPlayZ";
+    public static final String CREDITS = EnumChatFormatting.DARK_PURPLE + "Matrix (TCLProject)" + EnumChatFormatting.WHITE + " , " + EnumChatFormatting.RED + "HRudyPlayZ";
 
     public static final String[] AUTHORS = new String[]{"Tesseract"};
 

@@ -122,7 +122,7 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
     // Only exists in 1.7.10. Comment out if not needed.
     @Override
     public String getAccessTransformerClass() {
-        return "mods.battlegear2.coremod.transformers.BattlegearAccessTransformer";
+        return null;
     }
 
 
