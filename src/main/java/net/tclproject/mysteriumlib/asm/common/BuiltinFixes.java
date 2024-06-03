@@ -1,6 +1,6 @@
 package net.tclproject.mysteriumlib.asm.common;
 
-import cpw.mods.fml.common.Loader;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.tclproject.mysteriumlib.asm.annotations.Fix;
 

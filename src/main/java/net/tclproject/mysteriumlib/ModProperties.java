@@ -1,31 +1,31 @@
 package net.tclproject.mysteriumlib;
 
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 
 public class ModProperties {
     // This class will be used to define mod properties in order to access them from anywhere.
 
     // General values
-    public static final String MODID = "MysteriumLib";
+    public static final String MODID = "mysteriumlib";
     public static final String NAME = "MysteriumLib";
     public static final String VERSION = "1.4";
-    public static final String MC_VERSION = "1.7.10";
+    public static final String MC_VERSION = "1.12.2";
     public static final String URL = "";
     public static final String VERSION_CHECKER_URL = "";
 
     // Mod info page
-    public static final String COLORED_NAME = EnumChatFormatting.DARK_PURPLE + "Mysterium"
-        + EnumChatFormatting.GREEN
+    public static final String COLORED_NAME = TextFormatting.DARK_PURPLE + "Mysterium"
+        + TextFormatting.GREEN
         + "Lib ";
 
-    public static final String COLORED_VERSION = EnumChatFormatting.GRAY + VERSION;
-    public static final String COLORED_URL = EnumChatFormatting.GRAY + URL;
+    public static final String COLORED_VERSION = TextFormatting.GRAY + VERSION;
+    public static final String COLORED_URL = TextFormatting.GRAY + URL;
 
-    public static final String CREDITS = EnumChatFormatting.DARK_PURPLE + "Matrix (TCLProject)" + EnumChatFormatting.RED + "HRudyPlayZ";
+    public static final String CREDITS = TextFormatting.DARK_PURPLE + "Matrix (TCLProject) , " + TextFormatting.RED + "HRudyPlayZ";
 
     public static final String[] AUTHORS = new String[]{"Tesseract"};
 
-    public static final String DESCRIPTION = EnumChatFormatting.GRAY
+    public static final String DESCRIPTION = TextFormatting.GRAY
         + "A library mod used for multiple things including easy ASM fixes and more.";
 
     public static final String[] SPLASH_OF_THE_DAY = new String[]{"Please patch me!",

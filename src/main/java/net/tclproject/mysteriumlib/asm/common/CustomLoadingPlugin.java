@@ -1,9 +1,9 @@
 package net.tclproject.mysteriumlib.asm.common;
 
-import cpw.mods.fml.common.FMLLog;
-import cpw.mods.fml.common.asm.transformers.DeobfuscationTransformer;
-import cpw.mods.fml.relauncher.CoreModManager;
-import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.asm.transformers.DeobfuscationTransformer;
+import net.minecraftforge.fml.relauncher.CoreModManager;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.tclproject.mysteriumlib.asm.core.ASMFix;
 import net.tclproject.mysteriumlib.asm.core.MetaReader;
 import net.tclproject.mysteriumlib.asm.core.TargetClassTransformer;
@@ -61,7 +61,7 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
      */
     public static TargetClassTransformer getTransformer() {
         return FirstClassTransformer.instance.registeredBuiltinFixes ?
-            CustomClassTransformer.instance : FirstClassTransformer.instance;
+                CustomClassTransformer.instance : FirstClassTransformer.instance;
     }
 
     /**
@@ -122,7 +122,7 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
     // Only exists in 1.7.10. Comment out if not needed.
     @Override
     public String getAccessTransformerClass() {
-        return "mods.battlegear2.coremod.transformers.BattlegearAccessTransformer";
+        return null;
     }
 
 

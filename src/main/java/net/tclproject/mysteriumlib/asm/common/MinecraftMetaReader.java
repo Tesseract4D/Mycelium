@@ -1,7 +1,7 @@
 package net.tclproject.mysteriumlib.asm.common;
 
-import cpw.mods.fml.common.FMLLog;
-import cpw.mods.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.tclproject.mysteriumlib.asm.core.MetaReader;

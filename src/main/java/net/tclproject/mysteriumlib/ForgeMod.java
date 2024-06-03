@@ -1,18 +1,17 @@
 package net.tclproject.mysteriumlib;
 
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraft.launchwrapper.Launch;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.Collections;
 import java.util.Random;
 
 @Mod(modid = ModProperties.MODID, useMetadata = true, version = ModProperties.VERSION, name = ModProperties.NAME)
 public class ForgeMod {
-
     @Mod.Instance(ModProperties.MODID)
     public static ForgeMod instance;
 
@@ -45,8 +44,8 @@ public class ForgeMod {
 
         // Mod description
         event.getModMetadata().description = ModProperties.DESCRIPTION + "\n\n"
-            + EnumChatFormatting.DARK_GRAY
-            + EnumChatFormatting.ITALIC
+            + TextFormatting.DARK_GRAY
+            + TextFormatting.ITALIC
             + ModProperties.SPLASH_OF_THE_DAY[(new Random()).nextInt(ModProperties.SPLASH_OF_THE_DAY.length)];
 
         if (ModProperties.LOGO != null) event.getModMetadata().logoFile = ModProperties.LOGO; // Mod logo

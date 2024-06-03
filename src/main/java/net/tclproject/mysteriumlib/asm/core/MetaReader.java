@@ -1,6 +1,6 @@
 package net.tclproject.mysteriumlib.asm.core;
 
-import cpw.mods.fml.common.FMLLog;
+import net.minecraftforge.fml.common.FMLLog;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Level;
 import org.objectweb.asm.*;
