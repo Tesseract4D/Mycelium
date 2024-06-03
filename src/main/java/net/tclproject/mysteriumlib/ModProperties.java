@@ -21,7 +21,7 @@ public class ModProperties {
     public static final String COLORED_VERSION = EnumChatFormatting.GRAY + VERSION;
     public static final String COLORED_URL = EnumChatFormatting.GRAY + URL;
 
-    public static final String CREDITS = EnumChatFormatting.DARK_PURPLE + "Matrix (TCLProject)" + EnumChatFormatting.RED + "HRudyPlayZ";
+    public static final String CREDITS = EnumChatFormatting.DARK_PURPLE + "Matrix (TCLProject)" + EnumChatFormatting.WHITE + " , " + EnumChatFormatting.RED + "HRudyPlayZ";
 
     public static final String[] AUTHORS = new String[]{"Tesseract"};
 

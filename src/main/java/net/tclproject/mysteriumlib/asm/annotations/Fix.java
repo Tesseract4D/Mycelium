@@ -1,12 +1,5 @@
 package net.tclproject.mysteriumlib.asm.annotations;
 
-// TODO: Add this everywhere
-/* Copyright TCLProject - All Rights Reserved
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * Written by TCLProject <endermcraftmail@gmail.com>, December 2020
- */
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 
