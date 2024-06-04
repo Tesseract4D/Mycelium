@@ -1,9 +1,9 @@
 package net.tclproject.mysteriumlib.asm.core;
 
 import net.tclproject.mysteriumlib.asm.core.MiscUtils.LogHelper;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.*;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +25,8 @@ public class TargetClassTransformer {
      * Map of "target class name":"List of ASMFix/es to be applied".
      */
     protected HashMap<String, List<ASMFix>> fixesMap = new HashMap<>();
+
+    protected HashMap<String, String[]> STMap = new HashMap<>();
     /**
      * Class that will parse the fix class and methods.
      */
@@ -61,29 +63,27 @@ public class TargetClassTransformer {
         containerParser.parseForFixes(classBytes);
     }
 
+    public void registerSuperclassTransform(String className, String superName, String transformedName) {
+        STMap.put(className, new String[]{superName, transformedName});
+    }
+
     /**
      * Takes the original bytecode of a class and returns the modified version of it with fixes applied.
      */
     public byte[] transform(String className, byte[] classBytes) {
+        // Some random java version verification algorithm from google
+        int javaVersion = ((classBytes[6] & 0xFF) << 8) | (classBytes[7] & 0xFF);
+        boolean java7 = javaVersion > 50;
+
+        ClassReader classReader = new ClassReader(classBytes);
+        ClassWriter classWriter = createClassWriter(java7 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS); // If java is 7+, compute frames, if not, set everything to max possible
+
         List<ASMFix> fixes = fixesMap.get(className); // gets the fixes for the class
 
         if (fixes != null) { // if there are any
             Collections.sort(fixes); // sort fixes using method inside ASMFix
             logger.debug("Injecting fixes into class " + className + ".");
             try {
-                /*
-                 Starting with java 7, the process of bytecode verification got changed pretty drastically.
-                 Because of this, we have to turn on the automatic generation of stack map frames.
-                 On older versions of java, this is just a waste of time.
-                 More details here: http://stackoverflow.com/questions/25109942
-                */
-
-                // Some random java version verification algorithm from google
-                int javaVersion = ((classBytes[6] & 0xFF) << 8) | (classBytes[7] & 0xFF);
-                boolean java7 = javaVersion > 50;
-
-                ClassReader classReader = new ClassReader(classBytes);
-                ClassWriter classWriter = createClassWriter(java7 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS); // If java is 7+, compute frames, if not, set everything to max possible
                 FixInserterClassVisitor fixInserterVisitor = createInserterClassVisitor(classWriter, fixes);
                 classReader.accept(fixInserterVisitor, java7 ? ClassReader.SKIP_FRAMES : ClassReader.EXPAND_FRAMES); // Make the fix inserter class visitor run through the methods and return fix inserter method visitors
 
@@ -113,6 +113,29 @@ public class TargetClassTransformer {
                     logger.warning("Can not find the target method of fix: " + notInserted);
                 }
             }
+        }
+
+        String[] st;
+        if ((st = STMap.get(className)) != null) {
+            classReader.accept(new ClassVisitor(Opcodes.ASM5, classWriter) {
+                @Override
+                public void visit(int version, int access, @Nonnull String name, @Nonnull String signature, @Nonnull String superName, @Nonnull String[] interfaces) {
+                    super.visit(version, access, name, signature, st[1], interfaces);
+                }
+
+                @Nonnull
+                @Override
+                public MethodVisitor visitMethod(int access, @Nonnull String name, @Nonnull String desc, @Nonnull String signature, @Nonnull String[] exceptions) {
+                    final MethodVisitor old = super.visitMethod(access, name, desc, signature, exceptions);
+                    return "<init>".equals(name) ? new MethodVisitor(Opcodes.ASM5, old) {
+                        @Override
+                        public void visitMethodInsn(int opcode, @Nonnull String owner, @Nonnull String name, @Nonnull String desc, boolean itf) {
+                            super.visitMethodInsn(opcode, st[0].equals(owner) ? st[1] : owner, name, desc, itf);
+                        }
+                    } : old;
+                }
+            }, 0);
+            return classWriter.toByteArray();
         }
         return classBytes;
     }
