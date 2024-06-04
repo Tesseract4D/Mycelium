@@ -71,19 +71,18 @@ public class TargetClassTransformer {
      * Takes the original bytecode of a class and returns the modified version of it with fixes applied.
      */
     public byte[] transform(String className, byte[] classBytes) {
-        // Some random java version verification algorithm from google
-        int javaVersion = ((classBytes[6] & 0xFF) << 8) | (classBytes[7] & 0xFF);
-        boolean java7 = javaVersion > 50;
-
-        ClassReader classReader = new ClassReader(classBytes);
-        ClassWriter classWriter = createClassWriter(java7 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS); // If java is 7+, compute frames, if not, set everything to max possible
-
         List<ASMFix> fixes = fixesMap.get(className); // gets the fixes for the class
 
         if (fixes != null) { // if there are any
             Collections.sort(fixes); // sort fixes using method inside ASMFix
             logger.debug("Injecting fixes into class " + className + ".");
             try {
+                // Some random java version verification algorithm from google
+                int javaVersion = ((classBytes[6] & 0xFF) << 8) | (classBytes[7] & 0xFF);
+                boolean java7 = javaVersion > 50;
+
+                ClassReader classReader = new ClassReader(classBytes);
+                ClassWriter classWriter = createClassWriter(java7 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS); // If java is 7+, compute frames, if not, set everything to max possible
                 FixInserterClassVisitor fixInserterVisitor = createInserterClassVisitor(classWriter, fixes);
                 classReader.accept(fixInserterVisitor, java7 ? ClassReader.SKIP_FRAMES : ClassReader.EXPAND_FRAMES); // Make the fix inserter class visitor run through the methods and return fix inserter method visitors
 
@@ -117,6 +116,8 @@ public class TargetClassTransformer {
 
         String[] st;
         if ((st = STMap.get(className)) != null) {
+            ClassReader classReader = new ClassReader(classBytes);
+            ClassWriter classWriter = new ClassWriter(0);
             classReader.accept(new ClassVisitor(Opcodes.ASM5, classWriter) {
                 @Override
                 public void visit(int version, int access, @Nonnull String name, @Nonnull String signature, @Nonnull String superName, @Nonnull String[] interfaces) {
