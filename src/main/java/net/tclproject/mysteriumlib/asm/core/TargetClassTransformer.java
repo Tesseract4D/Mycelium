@@ -63,7 +63,7 @@ public class TargetClassTransformer {
         containerParser.parseForFixes(classBytes);
     }
 
-    public void registerSuperclassTransform(String className, String superName, String transformedName) {
+    public void registerSuperclassTransformer(String className, String superName, String transformedName) {
         STMap.put(className, new String[]{superName, transformedName});
     }
 
