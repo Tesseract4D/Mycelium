@@ -1,9 +1,9 @@
 package net.tclproject.mysteriumlib.asm.core;
 
 import net.tclproject.mysteriumlib.asm.core.MiscUtils.LogHelper;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.*;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +25,9 @@ public class TargetClassTransformer {
      * Map of "target class name":"List of ASMFix/es to be applied".
      */
     protected HashMap<String, List<ASMFix>> fixesMap = new HashMap<>();
+
+    protected HashMap<String, String[]> STMap = new HashMap<>();
+
     /**
      * Class that will parse the fix class and methods.
      */
@@ -59,6 +62,10 @@ public class TargetClassTransformer {
      */
     public void registerClassWithFixes(byte[] classBytes) {
         containerParser.parseForFixes(classBytes);
+    }
+
+    public void registerSuperclassTransform(String className, String superName, String transformedName) {
+        STMap.put(className, new String[]{superName, transformedName});
     }
 
     /**
@@ -113,6 +120,31 @@ public class TargetClassTransformer {
                     logger.warning("Can not find the target method of fix: " + notInserted);
                 }
             }
+        }
+
+        String[] st;
+        if ((st = STMap.get(className)) != null) {
+            ClassReader classReader = new ClassReader(classBytes);
+            ClassWriter classWriter = new ClassWriter(0);
+            classReader.accept(new ClassVisitor(Opcodes.ASM5, classWriter) {
+                @Override
+                public void visit(int version, int access, @Nonnull String name, @Nonnull String signature, @Nonnull String superName, @Nonnull String[] interfaces) {
+                    super.visit(version, access, name, signature, st[1], interfaces);
+                }
+
+                @Nonnull
+                @Override
+                public MethodVisitor visitMethod(int access, @Nonnull String name, @Nonnull String desc, @Nonnull String signature, @Nonnull String[] exceptions) {
+                    final MethodVisitor old = super.visitMethod(access, name, desc, signature, exceptions);
+                    return "<init>".equals(name) ? new MethodVisitor(Opcodes.ASM5, old) {
+                        @Override
+                        public void visitMethodInsn(int opcode, @Nonnull String owner, @Nonnull String name, @Nonnull String desc, boolean itf) {
+                            super.visitMethodInsn(opcode, st[0].equals(owner) ? st[1] : owner, name, desc, itf);
+                        }
+                    } : old;
+                }
+            }, 0);
+            return classWriter.toByteArray();
         }
         return classBytes;
     }
