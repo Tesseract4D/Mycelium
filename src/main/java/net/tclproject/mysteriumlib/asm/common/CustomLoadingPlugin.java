@@ -88,8 +88,6 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
     public void registerImplementation(String className, String... interfaces) {
         for (int i = 0; i < interfaces.length; i++)
             interfaces[i] = interfaces[i].replaceAll("\\.", "/");
-        System.out.println(6666);
-        System.out.println(interfaces[0]);
         getTransformer().registerImplementation(className, interfaces);
     }
 

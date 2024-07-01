@@ -5,10 +5,7 @@ import net.tclproject.mysteriumlib.asm.core.MiscUtils.LogHelper;
 import org.objectweb.asm.*;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Class that processes byte[] classes, to be integrated with IFMLLoadingPlugin to get classes passed into transform method.
@@ -28,7 +25,7 @@ public class TargetClassTransformer {
     protected HashMap<String, List<ASMFix>> fixesMap = new HashMap<>();
 
     protected HashMap<String, String[]> STMap = new HashMap<>();
-    protected HashMap<String, String[]> interfacesMap = new HashMap<>();
+    protected HashMap<String, HashSet<String>> interfacesMap = new HashMap<>();
     /**
      * Class that will parse the fix class and methods.
      */
@@ -70,11 +67,11 @@ public class TargetClassTransformer {
     }
 
     public void registerImplementation(String className, String... interfaces) {
-        String[] i;
-        if ((i = interfacesMap.get(className)) != null) {
-            interfacesMap.replace(className, ObjectArrays.concat(i, interfaces, String.class));
+        HashSet<String> i = new HashSet<>(Arrays.asList(interfaces)), j;
+        if ((j = interfacesMap.get(className)) != null) {
+            j.addAll(i);
         } else {
-            interfacesMap.put(className, interfaces);
+            interfacesMap.put(className, i);
         }
     }
 
@@ -149,14 +146,15 @@ public class TargetClassTransformer {
             }, 0);
             classBytes = classWriter.toByteArray();
         }
-        String[] i;
+        HashSet<String> i;
         if ((i = interfacesMap.get(className)) != null) {
             ClassReader classReader = new ClassReader(classBytes);
             ClassWriter classWriter = new ClassWriter(0);
             classReader.accept(new ClassVisitor(Opcodes.ASM5, classWriter) {
                 @Override
                 public void visit(int version, int access, @Nonnull String name, @Nonnull String signature, @Nonnull String superName, @Nonnull String[] interfaces) {
-                    super.visit(version, access, name, signature, superName, ObjectArrays.concat(i, interfaces, String.class));
+                    i.addAll(Arrays.asList(interfaces));
+                    super.visit(version, access, name, signature, superName, i.toArray(new String[]{}));
                 }
             }, 0);
             classBytes = classWriter.toByteArray();
