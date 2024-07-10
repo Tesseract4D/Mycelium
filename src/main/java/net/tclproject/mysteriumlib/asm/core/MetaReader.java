@@ -107,6 +107,14 @@ public class MetaReader {
         printLocalVariables(classToBytes(className), methodName, argumentTypes);
     }
 
+    public void printLocalVariables(Method m) throws IOException {
+        printLocalVariables(classToBytes(m.getDeclaringClass().getName()), m.getName(), Type.getArgumentTypes(m));
+    }
+
+    public List<String> getLocalVariables(Method m) throws IOException {
+        return getLocalVariables(classToBytes(m.getDeclaringClass().getName()), m.getName(), Type.getArgumentTypes(m));
+    }
+
 
     /**
      * Gets the passed in class in an InputStream.

@@ -83,7 +83,7 @@ public @interface Fix {
 
     /**
      * By default, the fix is inserted into the beginning of the target method.
-     * If you set this, it will be inserted at the said line.
+     * If you set this, it will be inserted at the said line from method start.
      * The use of this is NOT recommended because it can break very easily,
      * (for example, if some mod *cough* optifine *cough* will replace the class fully).
      * <p/>
@@ -97,6 +97,8 @@ public @interface Fix {
      * In the end, the returned value will be the one that this method will return.
      */
     String anotherMethodReturned() default "";
+
+    String insertOnInvoke() default "";
 
     /**
      * If true, return in the target method will always return null.

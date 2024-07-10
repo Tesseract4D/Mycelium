@@ -83,4 +83,21 @@ public abstract class FixInserterFactory {
             return new FixInserter.OnLineNumberInserter(mv, access, name, desc, fix, cv, lineNumber);
         }
     }
+
+    public static class OnInvoke extends FixInserterFactory {
+
+        private String method;
+        private int n;
+
+        public OnInvoke(String method, int n) {
+            this.method = method;
+            this.n = n;
+        }
+
+        @Override
+        public FixInserter createFixInserter(MethodVisitor mv, int access, String name, String desc,
+                                             ASMFix fix, FixInserterClassVisitor cv) {
+            return new FixInserter.OnInvokeInserter(mv, access, name, desc, fix, cv, method, n);
+        }
+    }
 }

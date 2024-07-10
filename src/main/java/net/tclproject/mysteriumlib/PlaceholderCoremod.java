@@ -13,5 +13,6 @@ public class PlaceholderCoremod extends CustomLoadingPlugin {
 
     @Override
     public void registerFixes() {
+        registerClassWithFixes("net.tclproject.mysteriumlib.ForgeMod");
     }
 }

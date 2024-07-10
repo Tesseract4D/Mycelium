@@ -148,6 +148,7 @@ public class FixParser {
         int currentParameterId = 1;
         for (int i = 1; i < argumentTypes.length; i++) { // loop to deal with ReturnedValue or LocalVariable annotations inside the fix method's arguments
             Type currentArgumentType = argumentTypes[i];
+
             if (argumentAnnotations.containsKey(i)) { // if the argument is a ReturnedValue or LocalVariable annotation (all of those are added to argumentAnnotations)
                 int stackIndexToBePassed = argumentAnnotations.get(i);
                 if (stackIndexToBePassed == -1) { // if the stack index to be passed is -1, it's the value at the top
@@ -166,8 +167,13 @@ public class FixParser {
         if (insertOnExit)
             builder.setInjectorFactory(ASMFix.ON_EXIT_FACTORY); // If we have to insert the fix on the exits from a method, we set the factory to the one that makes fixes that insert themselves on the exits
 
-        if (annotationValues.containsKey("insertOnLine")) {
-            int lineToBeInsertedOn = (Integer) annotationValues.get("insertOnLine");
+        if (annotationValues.containsKey("insertOnInvoke")) {
+            if (annotationValues.containsKey("insertOnLine"))
+                builder.setInjectorFactory(new FixInserterFactory.OnInvoke((String) annotationValues.get("insertOnInvoke"), (int) annotationValues.get("insertOnLine")));
+            else
+                builder.setInjectorFactory(new FixInserterFactory.OnInvoke((String) annotationValues.get("insertOnInvoke"), -2));
+        } else if (annotationValues.containsKey("insertOnLine")) {
+            int lineToBeInsertedOn = (int) annotationValues.get("insertOnLine");
             builder.setInjectorFactory(new FixInserterFactory.OnLineNumber(lineToBeInsertedOn)); // If we have to insert the fix on a line number, we set the factory to the one that makes fixes that inserts that insert themselves on the specific line number
         }
 

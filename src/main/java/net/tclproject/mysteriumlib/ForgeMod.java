@@ -1,23 +1,14 @@
 package net.tclproject.mysteriumlib;
 
-import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import net.minecraft.block.Block;
-import net.minecraft.client.renderer.RenderBlocks;
-import net.minecraft.client.renderer.tileentity.TileEntitySkullRenderer;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.launchwrapper.Launch;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.StringUtils;
-import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.tclproject.mysteriumlib.asm.annotations.Fix;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
@@ -25,62 +16,19 @@ import java.util.Random;
 
 @Mod(modid = ModProperties.MODID, useMetadata = true, version = ModProperties.VERSION, name = ModProperties.NAME)
 public class ForgeMod {
-
-    @Mod.Instance(ModProperties.MODID)
-    public static ForgeMod instance;
-
-    private boolean obfuscated;
+    public static boolean obfuscated;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         makeFancyModInfo(event);
 
-        instance = this;
-        MinecraftForge.EVENT_BUS.register(instance);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
-    @SubscribeEvent
-    public void renderHelmet(RenderPlayerEvent.Specials.Pre e) {
-        e.renderHelmet = false;
-        ItemStack itemstack = e.entityPlayer.inventory.armorItemInSlot(3);
-
-        if (itemstack != null) {
-            GL11.glPushMatrix();
-            e.renderer.modelBipedMain.bipedHead.postRender(0.0625F);
-            float f1;
-
-            if (itemstack.getItem() instanceof ItemBlock) {
-                net.minecraftforge.client.IItemRenderer customRenderer = net.minecraftforge.client.MinecraftForgeClient.getItemRenderer(itemstack, net.minecraftforge.client.IItemRenderer.ItemRenderType.EQUIPPED);
-                boolean is3D = (customRenderer != null && customRenderer.shouldUseRenderHelper(net.minecraftforge.client.IItemRenderer.ItemRenderType.EQUIPPED, itemstack, net.minecraftforge.client.IItemRenderer.ItemRendererHelper.BLOCK_3D));
-
-                if (is3D || RenderBlocks.renderItemIn3d(Block.getBlockFromItem(itemstack.getItem()).getRenderType())) {
-                    f1 = 0.625F;
-                    GL11.glTranslatef(0.0F, -0.25F, 0.0F);
-                    GL11.glRotatef(90.0F, 0.0F, 1.0F, 0.0F);
-                    GL11.glScalef(f1, -f1, -f1);
-                }
-
-                e.renderer.renderManager.itemRenderer.renderItem(e.entityPlayer, itemstack, 0);
-            } else if (itemstack.getItem() == Items.skull) {
-                f1 = 1.126F;
-                GL11.glScalef(f1, -f1, -f1);
-                GameProfile gameprofile = null;
-
-                if (itemstack.hasTagCompound()) {
-                    NBTTagCompound nbttagcompound = itemstack.getTagCompound();
-
-                    if (nbttagcompound.hasKey("SkullOwner", 10)) {
-                        gameprofile = NBTUtil.func_152459_a(nbttagcompound.getCompoundTag("SkullOwner"));
-                    } else if (nbttagcompound.hasKey("SkullOwner", 8) && !StringUtils.isNullOrEmpty(nbttagcompound.getString("SkullOwner"))) {
-                        gameprofile = new GameProfile(null, nbttagcompound.getString("SkullOwner"));
-                    }
-                }
-
-                TileEntitySkullRenderer.field_147536_b.func_152674_a(-0.5F, -0.025F, -0.5F, 1, 180.0F, itemstack.getItemDamage(), gameprofile);
-            }
-
-            GL11.glPopMatrix();
-        }
+    @Fix(insertOnInvoke = "org/lwjgl/opengl/GL11;glScalef(FFF)V", insertOnLine = 1)
+    public static void renderEquippedItems(RenderPlayer c, AbstractClientPlayer p, float f) {
+        float n = 1.06F;
+        GL11.glScalef(n, n, n);
     }
 
     public void makeFancyModInfo(FMLPreInitializationEvent event) {
@@ -111,6 +59,6 @@ public class ForgeMod {
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-        this.obfuscated = !(Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
+        obfuscated = !(Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
     }
 }
