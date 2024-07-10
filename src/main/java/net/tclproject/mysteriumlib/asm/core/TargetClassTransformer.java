@@ -1,6 +1,5 @@
 package net.tclproject.mysteriumlib.asm.core;
 
-import com.google.common.collect.ObjectArrays;
 import net.tclproject.mysteriumlib.asm.core.MiscUtils.LogHelper;
 import org.objectweb.asm.*;
 

@@ -8,7 +8,7 @@ public class ModProperties {
     // General values
     public static final String MODID = "MysteriumLib";
     public static final String NAME = "MysteriumLib";
-    public static final String VERSION = "1.5.4";
+    public static final String VERSION = "1.5.5";
     public static final String MC_VERSION = "1.7.10";
     public static final String URL = "";
     public static final String VERSION_CHECKER_URL = "";

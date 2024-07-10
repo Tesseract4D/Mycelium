@@ -1,11 +1,24 @@
 package net.tclproject.mysteriumlib;
 
+import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraft.block.Block;
+import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.tileentity.TileEntitySkullRenderer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.StringUtils;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
+import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.Random;
@@ -24,6 +37,50 @@ public class ForgeMod {
 
         instance = this;
         MinecraftForge.EVENT_BUS.register(instance);
+    }
+
+    @SubscribeEvent
+    public void renderHelmet(RenderPlayerEvent.Specials.Pre e) {
+        e.renderHelmet = false;
+        ItemStack itemstack = e.entityPlayer.inventory.armorItemInSlot(3);
+
+        if (itemstack != null) {
+            GL11.glPushMatrix();
+            e.renderer.modelBipedMain.bipedHead.postRender(0.0625F);
+            float f1;
+
+            if (itemstack.getItem() instanceof ItemBlock) {
+                net.minecraftforge.client.IItemRenderer customRenderer = net.minecraftforge.client.MinecraftForgeClient.getItemRenderer(itemstack, net.minecraftforge.client.IItemRenderer.ItemRenderType.EQUIPPED);
+                boolean is3D = (customRenderer != null && customRenderer.shouldUseRenderHelper(net.minecraftforge.client.IItemRenderer.ItemRenderType.EQUIPPED, itemstack, net.minecraftforge.client.IItemRenderer.ItemRendererHelper.BLOCK_3D));
+
+                if (is3D || RenderBlocks.renderItemIn3d(Block.getBlockFromItem(itemstack.getItem()).getRenderType())) {
+                    f1 = 0.625F;
+                    GL11.glTranslatef(0.0F, -0.25F, 0.0F);
+                    GL11.glRotatef(90.0F, 0.0F, 1.0F, 0.0F);
+                    GL11.glScalef(f1, -f1, -f1);
+                }
+
+                e.renderer.renderManager.itemRenderer.renderItem(e.entityPlayer, itemstack, 0);
+            } else if (itemstack.getItem() == Items.skull) {
+                f1 = 1.126F;
+                GL11.glScalef(f1, -f1, -f1);
+                GameProfile gameprofile = null;
+
+                if (itemstack.hasTagCompound()) {
+                    NBTTagCompound nbttagcompound = itemstack.getTagCompound();
+
+                    if (nbttagcompound.hasKey("SkullOwner", 10)) {
+                        gameprofile = NBTUtil.func_152459_a(nbttagcompound.getCompoundTag("SkullOwner"));
+                    } else if (nbttagcompound.hasKey("SkullOwner", 8) && !StringUtils.isNullOrEmpty(nbttagcompound.getString("SkullOwner"))) {
+                        gameprofile = new GameProfile(null, nbttagcompound.getString("SkullOwner"));
+                    }
+                }
+
+                TileEntitySkullRenderer.field_147536_b.func_152674_a(-0.5F, -0.025F, -0.5F, 1, 180.0F, itemstack.getItemDamage(), gameprofile);
+            }
+
+            GL11.glPopMatrix();
+        }
     }
 
     public void makeFancyModInfo(FMLPreInitializationEvent event) {
