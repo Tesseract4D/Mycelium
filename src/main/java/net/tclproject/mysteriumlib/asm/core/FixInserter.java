@@ -1,5 +1,7 @@
 package net.tclproject.mysteriumlib.asm.core;
 
+import net.tclproject.mysteriumlib.asm.common.CustomClassTransformer;
+import net.tclproject.mysteriumlib.asm.common.CustomLoadingPlugin;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -139,6 +141,11 @@ public abstract class FixInserter extends AdviceAdapter {
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
             super.visitMethodInsn(opcode, owner, name, desc, itf);
+            if (CustomLoadingPlugin.isObfuscated()) {
+                String deobfName = CustomClassTransformer.methodsMap.get(CustomClassTransformer.getMethodIndex(name));
+                if (deobfName != null)
+                    name = deobfName;
+            }
             if (method.equals(owner + ";" + name + desc))
                 if (n != -1 && (n == -2 || n-- == 0))
                     insertFix();

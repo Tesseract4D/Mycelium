@@ -29,7 +29,7 @@ public class CustomClassTransformer extends TargetClassTransformer implements IC
     /**
      * A map of "method index" : "mcp method name" for all the methods in methods.csv.
      */
-    private Map<Integer, String> methodsMap;
+    public static Map<Integer, String> methodsMap;
 
     /**
      * Transformers that will be executed after all the normal ones are.

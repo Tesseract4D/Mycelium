@@ -16,7 +16,6 @@ import java.util.Random;
 
 @Mod(modid = ModProperties.MODID, useMetadata = true, version = ModProperties.VERSION, name = ModProperties.NAME)
 public class ForgeMod {
-    public static boolean obfuscated;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -55,10 +54,5 @@ public class ForgeMod {
             + ModProperties.SPLASH_OF_THE_DAY[(new Random()).nextInt(ModProperties.SPLASH_OF_THE_DAY.length)];
 
         if (ModProperties.LOGO != null) event.getModMetadata().logoFile = ModProperties.LOGO; // Mod logo
-    }
-
-    @Mod.EventHandler
-    public void postInit(FMLPostInitializationEvent event) {
-        obfuscated = !(Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
     }
 }
