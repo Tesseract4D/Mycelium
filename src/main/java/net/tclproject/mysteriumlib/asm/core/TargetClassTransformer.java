@@ -130,18 +130,6 @@ public class TargetClassTransformer {
                 public void visit(int version, int access, @Nonnull String name, @Nonnull String signature, @Nonnull String superName, @Nonnull String[] interfaces) {
                     super.visit(version, access, name, signature, st[1], interfaces);
                 }
-
-                @Nonnull
-                @Override
-                public MethodVisitor visitMethod(int access, @Nonnull String name, @Nonnull String desc, @Nonnull String signature, @Nonnull String[] exceptions) {
-                    final MethodVisitor old = super.visitMethod(access, name, desc, signature, exceptions);
-                    return "<init>".equals(name) ? new MethodVisitor(Opcodes.ASM5, old) {
-                        @Override
-                        public void visitMethodInsn(int opcode, @Nonnull String owner, @Nonnull String name, @Nonnull String desc, boolean itf) {
-                            super.visitMethodInsn(opcode, st[0].equals(owner) ? st[1] : owner, name, desc, itf);
-                        }
-                    } : old;
-                }
             }, 0);
             classBytes = classWriter.toByteArray();
         }
