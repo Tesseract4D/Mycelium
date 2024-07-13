@@ -129,6 +129,10 @@ public class ASMFix implements Cloneable, Comparable<ASMFix> {
      */
     public boolean createMethod;
     /**
+     * If the fix needs to be inserted into all the child classes as well.
+     */
+    public boolean allThatExtend;
+    /**
      * If the game should crash if the inserting fails.
      */
     public boolean isFatal;
@@ -162,13 +166,6 @@ public class ASMFix implements Cloneable, Comparable<ASMFix> {
     public boolean isTheTarget(String name, String descriptor) {
         return (targetMethodReturnType == null && descriptor.startsWith(targetMethodDescriptor) ||
             descriptor.equals(targetMethodDescriptor)) && name.equals(targetMethodName);
-    }
-
-    /**
-     * Getter for createMethod.
-     */
-    public boolean getCreateMethod() {
-        return createMethod;
     }
 
     /**
@@ -917,6 +914,11 @@ public class ASMFix implements Cloneable, Comparable<ASMFix> {
             return this;
         }
 
+        public Builder setAllThatExtend(boolean allThatExtend) {
+            ASMFix.this.allThatExtend = allThatExtend;
+            return this;
+        }
+
         /**
          * Setter for isFatal. (if a fix with isFatal == true fails, the game crashes)
          *
@@ -994,6 +996,5 @@ public class ASMFix implements Cloneable, Comparable<ASMFix> {
 
             return fix;
         }
-
     }
 }

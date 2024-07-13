@@ -35,4 +35,6 @@
  */
 dependencies {
     runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.5.4-GTNH:dev")
+    implementation "maven.modrinth:gtnhlib:0.3.2"
+    implementation files("libs/HardcoreEnderExpansion-1.10.1-GTNH.jar")
 }

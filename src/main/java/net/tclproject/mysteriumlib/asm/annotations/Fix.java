@@ -82,6 +82,14 @@ public @interface Fix {
     boolean insertOnExit() default false;
 
     /**
+     * Instead of applying the fix only to the target class,
+     * applies the fix to all classes that extend the target class as well.
+     * Word of warning: 'dynamic' fixes like this HAVE to be non-fatal because they will inevitably
+     * fail on some class if the class does not have the target method overridden.
+     */
+    boolean allThatExtend() default false;
+
+    /**
      * By default, the fix is inserted into the beginning of the target method.
      * If you set this, it will be inserted at the said line from method start.
      * The use of this is NOT recommended because it can break very easily,
@@ -89,7 +97,7 @@ public @interface Fix {
      * <p/>
      * NOTE: the line numbers in mcp and in minecraft are sometimes different, beware.
      */
-    @Deprecated int insertOnLine() default -1;
+    int insertOnLine() default -1;
 
     /**
      * If you specify this name, when return will be called in the target method, this method will be called.

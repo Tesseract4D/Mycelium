@@ -225,6 +225,9 @@ public class FixParser {
         if (annotationValues.containsKey("createNewMethod")) {
             builder.setCreateMethod(Boolean.TRUE.equals(annotationValues.get("createNewMethod")));
         }
+        if (annotationValues.containsKey("allThatExtend")) {
+            builder.setAllThatExtend(Boolean.TRUE.equals(annotationValues.get("allThatExtend")));
+        }
         if (annotationValues.containsKey("isFatal")) {
             builder.setFatal(Boolean.TRUE.equals(annotationValues.get("isFatal")));
         }

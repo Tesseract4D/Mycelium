@@ -1,7 +1,10 @@
 package net.tclproject.mysteriumlib.asm.core;
 
 import net.tclproject.mysteriumlib.asm.core.MiscUtils.LogHelper;
-import org.objectweb.asm.*;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -22,6 +25,7 @@ public class TargetClassTransformer {
      * Map of "target class name":"List of ASMFix/es to be applied".
      */
     protected HashMap<String, List<ASMFix>> fixesMap = new HashMap<>();
+    protected HashMap<String, List<ASMFix>> fixesMapExtended;
 
     protected HashMap<String, String[]> STMap = new HashMap<>();
     protected HashMap<String, HashSet<String>> interfacesMap = new HashMap<>();
@@ -79,6 +83,65 @@ public class TargetClassTransformer {
      */
     public byte[] transform(String className, byte[] classBytes) {
         List<ASMFix> fixes = fixesMap.get(className); // gets the fixes for the class
+        final List<ASMFix> extendedFixes = new ArrayList<>();
+        if (fixesMapExtended == null) {
+            fixesMapExtended = new HashMap<>();
+            fixesMap.forEach((String k, List<ASMFix> v) -> {
+                for (ASMFix f : v) {
+                    if (f.allThatExtend) {
+                        List<ASMFix> g;
+                        String s = k.replace('.', '/');
+                        if ((g = fixesMapExtended.get(s)) != null)
+                            g.add(f);
+                        else {
+                            g = new ArrayList<>();
+                            g.add(f);
+                            fixesMapExtended.put(s, g);
+                        }
+                    }
+                }
+            });
+        }
+
+        ClassReader classReader = new ClassReader(classBytes);
+        ClassWriter classWriter = new ClassWriter(0);
+        classReader.accept(new ClassVisitor(Opcodes.ASM5, classWriter) {
+            @Override
+            public void visit(int version, int access, @Nonnull String name, @Nonnull String signature, @Nonnull String superName, @Nonnull String[] interfaces) {
+                String[] st;
+                if ((st = STMap.get(className)) != null) {
+                    super.visit(version, access, name, signature, st[1], interfaces);
+                } else {
+                    super.visit(version, access, name, signature, superName, interfaces);
+                }
+                List<ASMFix> f;
+                if ((f = fixesMapExtended.get(superName)) != null)
+                    extendedFixes.addAll(f);
+                for (String s : interfaces) {
+                    if ((f = fixesMapExtended.get(s)) != null)
+                        extendedFixes.addAll(f);
+                }
+            }
+        }, 0);
+        classBytes = classWriter.toByteArray();
+
+        if (!extendedFixes.isEmpty()) {
+            if (fixes == null) fixes = new ArrayList<>();
+            fixes.addAll(extendedFixes);
+        }
+        HashSet<String> i;
+        if ((i = interfacesMap.get(className)) != null) {
+            classReader = new ClassReader(classBytes);
+            classWriter = new ClassWriter(0);
+            classReader.accept(new ClassVisitor(Opcodes.ASM5, classWriter) {
+                @Override
+                public void visit(int version, int access, @Nonnull String name, @Nonnull String signature, @Nonnull String superName, @Nonnull String[] interfaces) {
+                    i.addAll(Arrays.asList(interfaces));
+                    super.visit(version, access, name, signature, superName, i.toArray(new String[]{}));
+                }
+            }, 0);
+            classBytes = classWriter.toByteArray();
+        }
 
         if (fixes != null) { // if there are any
             Collections.sort(fixes); // sort fixes using method inside ASMFix
@@ -88,8 +151,8 @@ public class TargetClassTransformer {
                 int javaVersion = ((classBytes[6] & 0xFF) << 8) | (classBytes[7] & 0xFF);
                 boolean java7 = javaVersion > 50;
 
-                ClassReader classReader = new ClassReader(classBytes);
-                ClassWriter classWriter = createClassWriter(java7 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS); // If java is 7+, compute frames, if not, set everything to max possible
+                classReader = new ClassReader(classBytes);
+                classWriter = createClassWriter(java7 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS); // If java is 7+, compute frames, if not, set everything to max possible
                 FixInserterClassVisitor fixInserterVisitor = createInserterClassVisitor(classWriter, fixes);
                 classReader.accept(fixInserterVisitor, java7 ? ClassReader.SKIP_FRAMES : ClassReader.EXPAND_FRAMES); // Make the fix inserter class visitor run through the methods and return fix inserter method visitors
 
@@ -98,7 +161,7 @@ public class TargetClassTransformer {
                 classBytes = classWriter.toByteArray(); // Overwrite the class bytes with the new class bytes
 
                 for (ASMFix fix : fixInserterVisitor.insertedFixes) {
-                    logger.debug("Fixed method " + fix.getFullTargetMethodName());
+                    logger.debug("Fixed method " + className.replace('/', '.') + '#' + fix.targetMethodName + fix.targetMethodDescriptor);
                 } // Print out all fixed methods
 
                 fixes.removeAll(fixInserterVisitor.insertedFixes); // remove inserted fixes from the list of fixes to be inserted
@@ -115,36 +178,10 @@ public class TargetClassTransformer {
             for (ASMFix notInserted : fixes) { // since inserted fixes get removed, we can just iterate through ones left
                 if (notInserted.isMandatory()) {
                     throw new RuntimeException("Can not find the target method of fatal fix: " + notInserted);
-                } else {
+                } else if (!notInserted.allThatExtend) {
                     logger.warning("Can not find the target method of fix: " + notInserted);
                 }
             }
-        }
-
-        String[] st;
-        if ((st = STMap.get(className)) != null) {
-            ClassReader classReader = new ClassReader(classBytes);
-            ClassWriter classWriter = new ClassWriter(0);
-            classReader.accept(new ClassVisitor(Opcodes.ASM5, classWriter) {
-                @Override
-                public void visit(int version, int access, @Nonnull String name, @Nonnull String signature, @Nonnull String superName, @Nonnull String[] interfaces) {
-                    super.visit(version, access, name, signature, st[1], interfaces);
-                }
-            }, 0);
-            classBytes = classWriter.toByteArray();
-        }
-        HashSet<String> i;
-        if ((i = interfacesMap.get(className)) != null) {
-            ClassReader classReader = new ClassReader(classBytes);
-            ClassWriter classWriter = new ClassWriter(0);
-            classReader.accept(new ClassVisitor(Opcodes.ASM5, classWriter) {
-                @Override
-                public void visit(int version, int access, @Nonnull String name, @Nonnull String signature, @Nonnull String superName, @Nonnull String[] interfaces) {
-                    i.addAll(Arrays.asList(interfaces));
-                    super.visit(version, access, name, signature, superName, i.toArray(new String[]{}));
-                }
-            }, 0);
-            classBytes = classWriter.toByteArray();
         }
         return classBytes;
     }
