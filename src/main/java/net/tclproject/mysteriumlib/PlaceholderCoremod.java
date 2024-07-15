@@ -1,5 +1,6 @@
 package net.tclproject.mysteriumlib;
 
+import chylex.hee.render.model.ModelEndermanHeadBiped;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.entity.Entity;
@@ -10,7 +11,6 @@ import org.lwjgl.opengl.GL11;
 
 public class PlaceholderCoremod extends CustomLoadingPlugin {
     // Required in order for MysteriumLib to be recognized as a coremod and for other coremods to import it.
-
 
     @Fix(insertOnInvoke = "org/lwjgl/opengl/GL11;glScalef(FFF)V", insertOnLine = 1)
     public static void renderEquippedItems(RenderPlayer c, AbstractClientPlayer p, float f) {
