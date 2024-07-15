@@ -80,7 +80,7 @@ public class FixInserterClassVisitor extends ClassVisitor {
     @Override
     public void visitEnd() {
         for (ASMFix fix : fixes) {
-            if (fix.createMethod && !insertedFixes.contains(fix)) { // if the method is to be created and we haven't done so already
+            if (fix.getCreateMethod() && !insertedFixes.contains(fix)) { // if the method is to be created and we haven't done so already
                 fix.createMethod(this); // create the said method
             }
         }
