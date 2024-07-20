@@ -29,12 +29,12 @@ public class CustomClassTransformer extends TargetClassTransformer implements IC
     /**
      * A map of "method index" : "mcp method name" for all the methods in methods.csv.
      */
-    private Map<Integer, String> methodsMap;
+    public static Map<Integer, String> methodsMap;
 
     /**
      * Transformers that will be executed after all the normal ones are.
      */
-    private static List<IClassTransformer> postTransformers = new ArrayList<>();
+    private static final List<IClassTransformer> postTransformers = new ArrayList<>();
 
     public CustomClassTransformer() {
         instance = this;
@@ -128,7 +128,7 @@ public class CustomClassTransformer extends TargetClassTransformer implements IC
         if (srgName.startsWith("func_")) {
             int first = srgName.indexOf('_');
             int second = srgName.indexOf('_', first + 1);
-            return Integer.valueOf(srgName.substring(first + 1, second));
+            return Integer.parseInt(srgName.substring(first + 1, second));
         } else {
             return -1;
         }

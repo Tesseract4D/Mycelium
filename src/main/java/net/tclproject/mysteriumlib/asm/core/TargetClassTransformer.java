@@ -4,10 +4,7 @@ import net.tclproject.mysteriumlib.asm.core.MiscUtils.LogHelper;
 import org.objectweb.asm.*;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Class that processes byte[] classes, to be integrated with IFMLLoadingPlugin to get classes passed into transform method.
@@ -27,7 +24,7 @@ public class TargetClassTransformer {
     protected HashMap<String, List<ASMFix>> fixesMap = new HashMap<>();
 
     protected HashMap<String, String[]> STMap = new HashMap<>();
-
+    protected HashMap<String, HashSet<String>> interfacesMap = new HashMap<>();
     /**
      * Class that will parse the fix class and methods.
      */
@@ -64,8 +61,17 @@ public class TargetClassTransformer {
         containerParser.parseForFixes(classBytes);
     }
 
-    public void registerSuperclassTransform(String className, String superName, String transformedName) {
+    public void registerSuperclassTransformer(String className, String superName, String transformedName) {
         STMap.put(className, new String[]{superName, transformedName});
+    }
+
+    public void registerImplementation(String className, String... interfaces) {
+        HashSet<String> i = new HashSet<>(Arrays.asList(interfaces)), j;
+        if ((j = interfacesMap.get(className)) != null) {
+            j.addAll(i);
+        } else {
+            interfacesMap.put(className, i);
+        }
     }
 
     /**
@@ -78,13 +84,6 @@ public class TargetClassTransformer {
             Collections.sort(fixes); // sort fixes using method inside ASMFix
             logger.debug("Injecting fixes into class " + className + ".");
             try {
-                /*
-                 Starting with java 7, the process of bytecode verification got changed pretty drastically.
-                 Because of this, we have to turn on the automatic generation of stack map frames.
-                 On older versions of java, this is just a waste of time.
-                 More details here: http://stackoverflow.com/questions/25109942
-                */
-
                 // Some random java version verification algorithm from google
                 int javaVersion = ((classBytes[6] & 0xFF) << 8) | (classBytes[7] & 0xFF);
                 boolean java7 = javaVersion > 50;
@@ -144,7 +143,20 @@ public class TargetClassTransformer {
                     } : old;
                 }
             }, 0);
-            return classWriter.toByteArray();
+            classBytes = classWriter.toByteArray();
+        }
+        HashSet<String> i;
+        if ((i = interfacesMap.get(className)) != null) {
+            ClassReader classReader = new ClassReader(classBytes);
+            ClassWriter classWriter = new ClassWriter(0);
+            classReader.accept(new ClassVisitor(Opcodes.ASM5, classWriter) {
+                @Override
+                public void visit(int version, int access, @Nonnull String name, @Nonnull String signature, @Nonnull String superName, @Nonnull String[] interfaces) {
+                    i.addAll(Arrays.asList(interfaces));
+                    super.visit(version, access, name, signature, superName, i.toArray(new String[]{}));
+                }
+            }, 0);
+            classBytes = classWriter.toByteArray();
         }
         return classBytes;
     }

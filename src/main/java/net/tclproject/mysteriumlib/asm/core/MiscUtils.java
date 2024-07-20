@@ -2,10 +2,12 @@ package net.tclproject.mysteriumlib.asm.core;
 
 import org.apache.commons.io.FileUtils;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Type;
 
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -229,9 +231,10 @@ public class MiscUtils {
             out.writeInt(entry.getKey());
             out.writeUTF(entry.getValue());
         }
-
         out.close();
-
     }
 
+    public static String getMemberInfo(Method m) {
+        return m.getDeclaringClass().getName().replaceAll("\\.", "/") + ";" + m.getName() + Type.getMethodDescriptor(m);
+    }
 }

@@ -1,0 +1,13 @@
+{
+  "ideaDirPath": "D:/0WorkSpace/MysteriumLib1.12.2/.idea",
+  "modulesMap": {
+    "MysteriumLib1.12.2": "D:/0WorkSpace/MysteriumLib1.12.2/.idea/MysteriumLib1.12.2.iml",
+    "MysteriumLib1.12.2:api": "D:/0WorkSpace/MysteriumLib1.12.2/.idea/modules/MysteriumLib1.12.2.api.iml",
+    "MysteriumLib1.12.2:ideVirtualMain": "D:/0WorkSpace/MysteriumLib1.12.2/.idea/modules/MysteriumLib1.12.2.ideVirtualMain.iml",
+    "MysteriumLib1.12.2:injectedTags": "D:/0WorkSpace/MysteriumLib1.12.2/.idea/modules/MysteriumLib1.12.2.injectedTags.iml",
+    "MysteriumLib1.12.2:main": "D:/0WorkSpace/MysteriumLib1.12.2/.idea/modules/MysteriumLib1.12.2.main.iml",
+    "MysteriumLib1.12.2:mcLauncher": "D:/0WorkSpace/MysteriumLib1.12.2/.idea/modules/MysteriumLib1.12.2.mcLauncher.iml",
+    "MysteriumLib1.12.2:patchedMc": "D:/0WorkSpace/MysteriumLib1.12.2/.idea/modules/MysteriumLib1.12.2.patchedMc.iml",
+    "MysteriumLib1.12.2:test": "D:/0WorkSpace/MysteriumLib1.12.2/.idea/modules/MysteriumLib1.12.2.test.iml"
+  }
+}

@@ -61,7 +61,7 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
      */
     public static TargetClassTransformer getTransformer() {
         return FirstClassTransformer.instance.registeredBuiltinFixes ?
-                CustomClassTransformer.instance : FirstClassTransformer.instance;
+            CustomClassTransformer.instance : FirstClassTransformer.instance;
     }
 
     /**
@@ -81,8 +81,14 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
         getTransformer().registerClassWithFixes(className);
     }
 
-    public static void registerSuperclassTransform(String className, String superName, String transformedName) {
-        getTransformer().registerSuperclassTransform(className, superName.replaceAll("\\.","/"), transformedName.replaceAll("\\.","/"));
+    public static void registerSuperclassTransformer(String className, String superName, String transformedName) {
+        getTransformer().registerSuperclassTransformer(className, superName.replace('.', '/'), transformedName.replace('.', '/'));
+    }
+
+    public void registerImplementation(String className, String... interfaces) {
+        for (int i = 0; i < interfaces.length; i++)
+            interfaces[i] = interfaces[i].replace('.', '/');
+        getTransformer().registerImplementation(className, interfaces);
     }
 
     /**
@@ -176,19 +182,17 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
         }
         for (File file : subfiles) {
             String name = file.getName();
-            if (name != null) {
-                name = name.toLowerCase();
-                if (name.endsWith(".jar") || name.endsWith(".zip")) {
-                    if (name.contains("thaumcraft")) {
-                        Logger.getGlobal().info("Core: Located Thaumcraft in " + file.getName());
-                        foundThaumcraft = true;
-                    } else if (name.contains("optifine")) {
-                        Logger.getGlobal().info("Core: Located OptiFine in " + file.getName() + ". We'll to confirm that...");
-                        foundOptiFine = true;
-                    } else if (name.contains("dragonapi")) {
-                        Logger.getGlobal().info("Core: Located DragonAPI in " + file.getName());
-                        foundDragonAPI = true;
-                    }
+            name = name.toLowerCase();
+            if (name.endsWith(".jar") || name.endsWith(".zip")) {
+                if (name.contains("thaumcraft")) {
+                    Logger.getGlobal().info("Core: Located Thaumcraft in " + file.getName());
+                    foundThaumcraft = true;
+                } else if (name.contains("optifine")) {
+                    Logger.getGlobal().info("Core: Located OptiFine in " + file.getName() + ". We'll to confirm that...");
+                    foundOptiFine = true;
+                } else if (name.contains("dragonapi")) {
+                    Logger.getGlobal().info("Core: Located DragonAPI in " + file.getName());
+                    foundDragonAPI = true;
                 }
             }
         }

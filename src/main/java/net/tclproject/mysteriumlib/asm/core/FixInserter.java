@@ -1,5 +1,7 @@
 package net.tclproject.mysteriumlib.asm.core;
 
+import net.tclproject.mysteriumlib.asm.common.CustomClassTransformer;
+import net.tclproject.mysteriumlib.asm.common.CustomLoadingPlugin;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -105,6 +107,7 @@ public abstract class FixInserter extends AdviceAdapter {
     public static class OnLineNumberInserter extends FixInserter {
 
         private int lineNumber;
+        private int startLine = -1;
 
         public OnLineNumberInserter(MethodVisitor mv, int access, String name, String desc, ASMFix fix, FixInserterClassVisitor cv, int lineNumber) {
             super(mv, access, name, desc, fix, cv);
@@ -117,9 +120,35 @@ public abstract class FixInserter extends AdviceAdapter {
         @Override
         public void visitLineNumber(int lineVisiting, Label start) {
             super.visitLineNumber(lineVisiting, start);
-            if (lineVisiting == this.lineNumber) {
+            if (startLine == -1)
+                startLine = lineVisiting;
+            if (lineVisiting - startLine == this.lineNumber) {
                 insertFix();
             }
+        }
+    }
+
+    public static class OnInvokeInserter extends FixInserter {
+        private String method;
+        private int n;
+
+        public OnInvokeInserter(MethodVisitor mv, int access, String name, String desc, ASMFix fix, FixInserterClassVisitor cv, String method, int n) {
+            super(mv, access, name, desc, fix, cv);
+            this.method = method;
+            this.n = n;
+        }
+
+        @Override
+        public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
+            if (CustomLoadingPlugin.isObfuscated()) {
+                String deobfName = CustomClassTransformer.methodsMap.get(CustomClassTransformer.getMethodIndex(name));
+                if (deobfName != null)
+                    name = deobfName;
+            }
+            if (method.equals(owner + ";" + name + desc))
+                if (n != -1 && (n == -2 || n-- == 0))
+                    insertFix();
         }
     }
 }
