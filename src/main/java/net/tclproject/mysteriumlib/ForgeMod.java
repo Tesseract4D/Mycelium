@@ -3,21 +3,17 @@ package net.tclproject.mysteriumlib;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import me.planetguy.remaininmotion.spectre.TileEntityMotiveSpectre;
-import net.minecraft.entity.Entity;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.tclproject.mysteriumlib.asm.core.MetaReader;
 
-import java.io.IOException;
 import java.util.Collections;
 
 @Mod(modid = ForgeMod.MODID, useMetadata = true, version = ForgeMod.VERSION, name = ForgeMod.NAME)
 public class ForgeMod {
     public static final String MODID = "MysteriumLib";
     public static final String NAME = "Mysterium Lib";
-    public static final String VERSION = "1.5.7";
+    public static final String VERSION = "1.5.9";
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent e) {
@@ -35,11 +31,6 @@ public class ForgeMod {
         e.getModMetadata().description = "A library mod used for multiple things including easy ASM fixes and more.";
 
         e.getModMetadata().logoFile = "assets/" + ForgeMod.MODID + "/logo.png";
-        try {
-            System.out.println("@" + new MetaReader().getLocalVariables(TileEntityMotiveSpectre.class.getDeclaredMethod("doPerSpectreEntityUpdate", TileEntityMotiveSpectre.CapturedEntity.class, Entity.class)));
-        } catch (IOException | NoSuchMethodException ex) {
-            throw new RuntimeException(ex);
-        }
     }
 
     @SubscribeEvent
