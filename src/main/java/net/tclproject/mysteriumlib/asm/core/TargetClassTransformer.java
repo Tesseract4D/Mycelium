@@ -96,13 +96,14 @@ public class TargetClassTransformer {
                 // Chain: register class with fix methods -> parse the class for fix methods and add them to the list to be inserted -> make custom class visitor -> visit target class and return custom method visitors that will be executed -> custom method visitors call ASMFix method to insert fixes from the list -> ASMFix inserts the fixes
 
                 classBytes = classWriter.toByteArray(); // Overwrite the class bytes with the new class bytes
-
-                for (ASMFix fix : fixInserterVisitor.insertedFixes) {
-                    logger.debug("Fixed method " + fix.getFullTargetMethodName());
-                } // Print out all fixed methods
-
-                fixes.removeAll(fixInserterVisitor.insertedFixes); // remove inserted fixes from the list of fixes to be inserted
-
+                for (ASMFix fix : fixes)
+                    if (fixInserterVisitor.insertedFixes.contains(fix))
+                        logger.debug("Fixed method " + fix.getFullTargetMethodName());// Print out all fixed methods
+                    else if (fix.isMandatory()) {
+                        throw new RuntimeException("Can not find the target method of fatal fix: " + fix);
+                    } else {
+                        logger.warning("Can not find the target method of fix: " + fix);
+                    }
             } catch (Exception e) {
                 logger.severe("A problem has occurred during transformation of class " + className + ".");
                 logger.severe("Fixes to be applied to this class:");
@@ -110,14 +111,6 @@ public class TargetClassTransformer {
                     logger.severe(fix.toString());
                 }
                 logger.severe("Stack trace:", e);
-            }
-
-            for (ASMFix notInserted : fixes) { // since inserted fixes get removed, we can just iterate through ones left
-                if (notInserted.isMandatory()) {
-                    throw new RuntimeException("Can not find the target method of fatal fix: " + notInserted);
-                } else {
-                    logger.warning("Can not find the target method of fix: " + notInserted);
-                }
             }
         }
 

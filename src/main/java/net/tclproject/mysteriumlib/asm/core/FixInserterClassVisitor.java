@@ -6,7 +6,9 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Custom ClassVisitor that visits the class of a target method. Returns custom FixInserters as method visitors and creates new methods inside the visited class if necessary.
@@ -21,7 +23,7 @@ public class FixInserterClassVisitor extends ClassVisitor {
     /**
      * Fixes we have already inserted.
      */
-    List<ASMFix> insertedFixes = new ArrayList<>(1);
+    Set<ASMFix> insertedFixes = new HashSet<>();
 
     /**
      * If a method visitor created by this class visitor is currently in the process of inserting a fix.
