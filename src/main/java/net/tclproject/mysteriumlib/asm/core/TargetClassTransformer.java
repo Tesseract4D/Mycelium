@@ -22,9 +22,8 @@ public class TargetClassTransformer {
      * Map of "target class name":"List of ASMFix/es to be applied".
      */
     protected HashMap<String, List<ASMFix>> fixesMap = new HashMap<>();
-
-    protected HashMap<String, String[]> STMap = new HashMap<>();
     protected HashMap<String, HashSet<String>> interfacesMap = new HashMap<>();
+    protected HashMap<String, List<String[]>> replacesMap = new HashMap<>();
     /**
      * Class that will parse the fix class and methods.
      */
@@ -47,6 +46,22 @@ public class TargetClassTransformer {
         }
     }
 
+    public void registerReplace(String in, String targetMethod, String currentClass, String currentName, String currentDescriptor) {
+        String[] s = in.split(",");
+        for (String d : s) {
+            int x = d.indexOf(';');
+            String c = d.substring(0, x).replace('/', '.');
+            List<String[]> i = new ArrayList<>(), j;
+            String[] replace = {d.substring(x + 1), targetMethod, currentClass, currentName, currentDescriptor};
+            i.add(replace);
+            if ((j = replacesMap.get(c)) != null) {
+                j.addAll(i);
+            } else {
+                replacesMap.put(c, i);
+            }
+        }
+    }
+
     /**
      * Registers the class with all the fix methods.
      */
@@ -59,10 +74,6 @@ public class TargetClassTransformer {
      */
     public void registerClassWithFixes(byte[] classBytes) {
         containerParser.parseForFixes(classBytes);
-    }
-
-    public void registerSuperclassTransformer(String className, String superName, String transformedName) {
-        STMap.put(className, new String[]{superName, transformedName});
     }
 
     public void registerImplementation(String className, String... interfaces) {
@@ -99,7 +110,7 @@ public class TargetClassTransformer {
                 for (ASMFix fix : fixes)
                     if (fixInserterVisitor.insertedFixes.contains(fix))
                         logger.debug("Fixed method " + fix.getFullTargetMethodName());// Print out all fixed methods
-                    else if (fix.isMandatory()) {
+                    else if (fix.isFatal) {
                         throw new RuntimeException("Can not find the target method of fatal fix: " + fix);
                     } else {
                         logger.warning("Can not find the target method of fix: " + fix);
@@ -114,30 +125,32 @@ public class TargetClassTransformer {
             }
         }
 
-        String[] st;
-        if ((st = STMap.get(className)) != null) {
+        List<String[]> replaces;
+        if ((replaces = replacesMap.get(className)) != null) {
             ClassReader classReader = new ClassReader(classBytes);
             ClassWriter classWriter = new ClassWriter(0);
             classReader.accept(new ClassVisitor(Opcodes.ASM5, classWriter) {
-                @Override
-                public void visit(int version, int access, @Nonnull String name, @Nonnull String signature, @Nonnull String superName, @Nonnull String[] interfaces) {
-                    super.visit(version, access, name, signature, st[1], interfaces);
-                }
-
                 @Nonnull
                 @Override
                 public MethodVisitor visitMethod(int access, @Nonnull String name, @Nonnull String desc, @Nonnull String signature, @Nonnull String[] exceptions) {
                     final MethodVisitor old = super.visitMethod(access, name, desc, signature, exceptions);
-                    return "<init>".equals(name) ? new MethodVisitor(Opcodes.ASM5, old) {
-                        @Override
-                        public void visitMethodInsn(int opcode, @Nonnull String owner, @Nonnull String name, @Nonnull String desc, boolean itf) {
-                            super.visitMethodInsn(opcode, st[0].equals(owner) ? st[1] : owner, name, desc, itf);
-                        }
-                    } : old;
+                    for (String[] replace : replaces) {
+                        if (replace[0].equals(name + desc)) return new MethodVisitor(Opcodes.ASM5, old) {
+                            @Override
+                            public void visitMethodInsn(int opcode, @Nonnull String owner, @Nonnull String name, @Nonnull String desc, boolean itf) {
+                                if (replace[1].equals(owner + ";" + name + desc))
+                                    super.visitMethodInsn(opcode, replace[2], replace[3], replace[4], itf);
+                                else
+                                    super.visitMethodInsn(opcode, owner, name, desc, itf);
+                            }
+                        };
+                    }
+                    return old;
                 }
             }, 0);
             classBytes = classWriter.toByteArray();
         }
+
         HashSet<String> i;
         if ((i = interfacesMap.get(className)) != null) {
             ClassReader classReader = new ClassReader(classBytes);

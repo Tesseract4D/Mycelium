@@ -81,10 +81,6 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
         getTransformer().registerClassWithFixes(className);
     }
 
-    public static void registerSuperclassTransformer(String className, String superName, String transformedName) {
-        getTransformer().registerSuperclassTransformer(className, superName.replace('.', '/'), transformedName.replace('.', '/'));
-    }
-
     public void registerImplementation(String className, String... interfaces) {
         for (int i = 0; i < interfaces.length; i++)
             interfaces[i] = interfaces[i].replace('.', '/');

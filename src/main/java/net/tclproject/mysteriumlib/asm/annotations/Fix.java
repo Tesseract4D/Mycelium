@@ -45,6 +45,10 @@ public @interface Fix {
 
     String targetClass() default "";
 
+    String replaceInMethods() default "";
+
+    String targetReplaceMethods() default "";
+
     /**
      * Specifies the type returned by the target method.
      * From the point of view of JVM there can be methods, that only differ by the return type.
@@ -82,14 +86,13 @@ public @interface Fix {
     boolean insertOnExit() default false;
 
     /**
-     * By default, the fix is inserted into the beginning of the target method.
-     * If you set this, it will be inserted at the said line from method start.
-     * The use of this is NOT recommended because it can break very easily,
-     * (for example, if some mod *cough* optifine *cough* will replace the class fully).
-     * <p/>
-     * NOTE: the line numbers in mcp and in minecraft are sometimes different, beware.
+     * 默认插入在方法开头。
+     * 如果使用这个将会插入在从方法开始的确定行数，从 0 开始。
+     * 但一些如 Optifine 的模组可能会行数不同。
+     * 也要注意开发环境和实际的行数也是有区别的。
+     * 如果和 insertOnInvoke 一同使用则代表插入第几个方法，从 0 开始。
      */
-    @Deprecated int insertOnLine() default -1;
+    int insertOnLine() default -1;
 
     /**
      * If you specify this name, when return will be called in the target method, this method will be called.
@@ -98,6 +101,11 @@ public @interface Fix {
      */
     String anotherMethodReturned() default "";
 
+    /**
+     * 插入在某个方法执行之后，填写方法的描述。
+     * 用 MiscUtils.getMemberInfo 获取描述。
+     * 可配合 insertOnLine 使用。
+     */
     String insertOnInvoke() default "";
 
     /**

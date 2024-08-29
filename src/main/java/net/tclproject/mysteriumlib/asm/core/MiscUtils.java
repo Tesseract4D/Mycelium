@@ -220,7 +220,7 @@ public class MiscUtils {
             String[] splitted = str.split(",");
             int first = splitted[0].indexOf('_');
             int second = splitted[0].indexOf('_', first + 1);
-            int id = Integer.valueOf(splitted[0].substring(first + 1, second));
+            int id = Integer.parseInt(splitted[0].substring(first + 1, second));
             map.put(id, splitted[1]);
         }
 
@@ -235,6 +235,6 @@ public class MiscUtils {
     }
 
     public static String getMemberInfo(Method m) {
-        return m.getDeclaringClass().getName().replaceAll("\\.", "/") + ";" + m.getName() + Type.getMethodDescriptor(m);
+        return m.getDeclaringClass().getName().replace('.', '/') + ";" + m.getName() + Type.getMethodDescriptor(m);
     }
 }

@@ -67,7 +67,7 @@ public class FixInserterClassVisitor extends ClassVisitor {
         MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
         for (ASMFix fix : fixes) {
             if (isTheTarget(fix, name, desc) && !insertedFixes.contains(fix)) { // if it's the target and it has not been inserted already
-                mv = fix.getInjectorFactory().createFixInserter(mv, access, name, desc, fix, this); // create a new fix inserter for this method
+                mv = fix.injectorFactory.createFixInserter(mv, access, name, desc, fix, this); // create a new fix inserter for this method
                 insertedFixes.add(fix); // set it so we know we have already inserted this fix
             }
         }
@@ -82,7 +82,7 @@ public class FixInserterClassVisitor extends ClassVisitor {
     @Override
     public void visitEnd() {
         for (ASMFix fix : fixes) {
-            if (fix.getCreateMethod() && !insertedFixes.contains(fix)) { // if the method is to be created and we haven't done so already
+            if (fix.createMethod && !insertedFixes.contains(fix)) { // if the method is to be created and we haven't done so already
                 fix.createMethod(this); // create the said method
             }
         }

@@ -165,27 +165,6 @@ public class ASMFix implements Cloneable, Comparable<ASMFix> {
     }
 
     /**
-     * Getter for createMethod.
-     */
-    public boolean getCreateMethod() {
-        return createMethod;
-    }
-
-    /**
-     * Getter for isFatal.
-     */
-    public boolean isMandatory() {
-        return isFatal;
-    }
-
-    /**
-     * Getter for injectorFactory.
-     */
-    public FixInserterFactory getInjectorFactory() {
-        return injectorFactory;
-    }
-
-    /**
      * Returns if a fix method is stored inside this ASMFix (in other words, if fixMethodName != null && classWithFixes != null).
      */
     public boolean hasFixMethod() {
