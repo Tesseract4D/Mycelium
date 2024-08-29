@@ -14,7 +14,7 @@ public class PlaceholderCoremod extends CustomLoadingPlugin {
     }
     @Override
     public void registerFixes() {
-        Configuration cfg = new Configuration(new File(Launch.minecraftHome, "config/mysterium.cfg"));
+        Configuration cfg = new Configuration(new File(Launch.minecraftHome, "config/mycelium.cfg"));
         if (cfg.getBoolean("creativeNoclip", "function", false, "Noclip in creative mode when fly."))
             registerClassWithFixes("net.tclproject.mysteriumlib.fix.FixesCreative");
         if (cfg.getBoolean("netherOresEFRCompat", "compat", false, "Nether Ores mod ores drops EFR raw ores."))

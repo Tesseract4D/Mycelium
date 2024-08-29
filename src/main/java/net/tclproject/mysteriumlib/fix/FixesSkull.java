@@ -19,5 +19,4 @@ public class FixesSkull {
         float n = 1.1F;
         GL11.glScalef(n, n, n);
     }
-
 }
