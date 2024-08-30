@@ -113,13 +113,6 @@ public class CustomClassTransformer extends TargetClassTransformer implements IC
     }
 
     /**
-     * Getter for methodsMap.
-     */
-    public Map<Integer, String> getMethodNames() {
-        return methodsMap;
-    }
-
-    /**
      * Gets a method index from a method name.
      *
      * @return the method index (or -1 if it's not found).

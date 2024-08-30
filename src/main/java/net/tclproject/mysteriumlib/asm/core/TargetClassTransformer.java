@@ -1,9 +1,13 @@
 package net.tclproject.mysteriumlib.asm.core;
 
 import net.tclproject.mysteriumlib.asm.core.MiscUtils.LogHelper;
-import org.objectweb.asm.*;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -23,7 +27,7 @@ public class TargetClassTransformer {
      */
     protected HashMap<String, List<ASMFix>> fixesMap = new HashMap<>();
     protected HashMap<String, HashSet<String>> interfacesMap = new HashMap<>();
-    protected HashMap<String, List<String[]>> replacesMap = new HashMap<>();
+    protected HashMap<String, List<ClassVisitor>> visitorMap = new HashMap<>();
     /**
      * Class that will parse the fix class and methods.
      */
@@ -32,6 +36,27 @@ public class TargetClassTransformer {
      * MetaReader instance used.
      */
     protected MetaReader metaReader = new MetaReader();
+
+    public static Field cvField;
+
+    static {
+        try {
+            cvField = ClassVisitor.class.getDeclaredField("cv");
+            cvField.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void registerClassVisitor(String cls, ClassVisitor visitor) {
+        if (visitorMap.containsKey(cls)) {
+            visitorMap.get(cls).add(visitor);
+        } else {
+            List<ClassVisitor> list = new ArrayList<>(2);
+            list.add(visitor);
+            visitorMap.put(cls, list);
+        }
+    }
 
     /**
      * Adds a fix to the list to be inserted.
@@ -43,22 +68,6 @@ public class TargetClassTransformer {
             List<ASMFix> list = new ArrayList<>(2); // Create a new list of fixes to be applied to the class.
             list.add(fix); // Add this fix to the list.
             fixesMap.put(fix.getTargetClassName(), list); // Put the class and the list of fixes for it into the map.
-        }
-    }
-
-    public void registerReplace(String in, String targetMethod, String currentClass, String currentName, String currentDescriptor) {
-        String[] s = in.split(",");
-        for (String d : s) {
-            int x = d.indexOf(';');
-            String c = d.substring(0, x).replace('/', '.');
-            List<String[]> i = new ArrayList<>(), j;
-            String[] replace = {d.substring(x + 1), targetMethod, currentClass, currentName, currentDescriptor};
-            i.add(replace);
-            if ((j = replacesMap.get(c)) != null) {
-                j.addAll(i);
-            } else {
-                replacesMap.put(c, i);
-            }
         }
     }
 
@@ -125,32 +134,6 @@ public class TargetClassTransformer {
             }
         }
 
-        List<String[]> replaces;
-        if ((replaces = replacesMap.get(className)) != null) {
-            ClassReader classReader = new ClassReader(classBytes);
-            ClassWriter classWriter = new ClassWriter(0);
-            classReader.accept(new ClassVisitor(Opcodes.ASM5, classWriter) {
-                @Nonnull
-                @Override
-                public MethodVisitor visitMethod(int access, @Nonnull String name, @Nonnull String desc, @Nonnull String signature, @Nonnull String[] exceptions) {
-                    final MethodVisitor old = super.visitMethod(access, name, desc, signature, exceptions);
-                    for (String[] replace : replaces) {
-                        if (replace[0].equals(name + desc)) return new MethodVisitor(Opcodes.ASM5, old) {
-                            @Override
-                            public void visitMethodInsn(int opcode, @Nonnull String owner, @Nonnull String name, @Nonnull String desc, boolean itf) {
-                                if (replace[1].equals(owner + ";" + name + desc))
-                                    super.visitMethodInsn(opcode, replace[2], replace[3], replace[4], itf);
-                                else
-                                    super.visitMethodInsn(opcode, owner, name, desc, itf);
-                            }
-                        };
-                    }
-                    return old;
-                }
-            }, 0);
-            classBytes = classWriter.toByteArray();
-        }
-
         HashSet<String> i;
         if ((i = interfacesMap.get(className)) != null) {
             ClassReader classReader = new ClassReader(classBytes);
@@ -163,6 +146,21 @@ public class TargetClassTransformer {
                 }
             }, 0);
             classBytes = classWriter.toByteArray();
+        }
+
+        List<ClassVisitor> cvs;
+        if ((cvs = visitorMap.get(className)) != null) {
+            for (ClassVisitor cv : cvs) {
+                ClassReader classReader = new ClassReader(classBytes);
+                ClassWriter classWriter = new ClassWriter(0);
+                try {
+                    cvField.set(cv, classWriter);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+                classReader.accept(cv, 0);
+                classBytes = classWriter.toByteArray();
+            }
         }
         return classBytes;
     }

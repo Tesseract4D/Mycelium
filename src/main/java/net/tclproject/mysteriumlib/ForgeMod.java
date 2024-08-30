@@ -6,7 +6,6 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.tclproject.mysteriumlib.asm.core.MiscUtils;
 
 import java.util.Collections;
 
@@ -32,18 +31,8 @@ public class ForgeMod {
         e.getModMetadata().description = "A library mod used for multiple things including easy ASM fixes and more.";
 
         e.getModMetadata().logoFile = "assets/" + ForgeMod.MODID + "/logo.png";
-        a();
-        b();
-        System.out.println("&" + MiscUtils.getMemberInfo(ForgeMod.class.getDeclaredMethod("preInit", FMLPreInitializationEvent.class)));
     }
 
-    public static void a() {
-        System.out.println("&" + 7777);
-    }
-
-    public static void b() {
-        System.out.println("&" + 8888);
-    }
     @SubscribeEvent
     public void onRenderBlockOverlay(RenderBlockOverlayEvent e) {
         if (e.player.noClip)

@@ -8,6 +8,7 @@ import net.tclproject.mysteriumlib.asm.core.ASMFix;
 import net.tclproject.mysteriumlib.asm.core.MetaReader;
 import net.tclproject.mysteriumlib.asm.core.TargetClassTransformer;
 import org.apache.logging.log4j.Level;
+import org.objectweb.asm.ClassVisitor;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -85,6 +86,10 @@ public class CustomLoadingPlugin implements IFMLLoadingPlugin {
         for (int i = 0; i < interfaces.length; i++)
             interfaces[i] = interfaces[i].replace('.', '/');
         getTransformer().registerImplementation(className, interfaces);
+    }
+
+    public void registerClassVisitor(String className, ClassVisitor cv) {
+        getTransformer().registerClassVisitor(className, cv);
     }
 
     /**

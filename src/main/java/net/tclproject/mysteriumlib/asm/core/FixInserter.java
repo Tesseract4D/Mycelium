@@ -140,7 +140,6 @@ public abstract class FixInserter extends AdviceAdapter {
 
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-            super.visitMethodInsn(opcode, owner, name, desc, itf);
             if (CustomLoadingPlugin.isObfuscated()) {
                 String deobfName = CustomClassTransformer.methodsMap.get(CustomClassTransformer.getMethodIndex(name));
                 if (deobfName != null)
@@ -149,6 +148,7 @@ public abstract class FixInserter extends AdviceAdapter {
             if (method.equals(owner + ";" + name + desc))
                 if (n != -1 && (n == -2 || n-- == 0))
                     insertFix();
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
         }
     }
 }

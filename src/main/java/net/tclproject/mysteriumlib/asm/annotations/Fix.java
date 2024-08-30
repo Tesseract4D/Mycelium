@@ -45,10 +45,6 @@ public @interface Fix {
 
     String targetClass() default "";
 
-    String replaceInMethods() default "";
-
-    String targetReplaceMethods() default "";
-
     /**
      * Specifies the type returned by the target method.
      * From the point of view of JVM there can be methods, that only differ by the return type.
@@ -102,7 +98,7 @@ public @interface Fix {
     String anotherMethodReturned() default "";
 
     /**
-     * 插入在某个方法执行之后，填写方法的描述。
+     * 插入在某个方法执行之前，填写方法的描述。
      * 用 MiscUtils.getMemberInfo 获取描述。
      * 可配合 insertOnLine 使用。
      */

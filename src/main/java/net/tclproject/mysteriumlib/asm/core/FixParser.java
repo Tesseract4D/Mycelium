@@ -108,18 +108,15 @@ public class FixParser {
      * Creates a fix out of the values currently stored in annotationValues, currentFixMethodName/Descriptor and argumentAnnotations, and adds it to the list to be applied
      */
     private void createAndRegisterFix(String clsName) {
-        if (annotationValues.containsKey("replaceInMethods") && annotationValues.containsKey("targetReplaceMethods")) {
-            transformer.registerReplace((String) annotationValues.get("replaceInMethods"), (String) annotationValues.get("targetReplaceMethods"), clsName.replace('.', '/'), currentFixMethodName, currentFixMethodDescriptor);
-            return;
-        }
-        ASMFix.Builder builder = ASMFix.newBuilder();
-        Type methodType = Type.getMethodType(currentFixMethodDescriptor);
-        Type[] argumentTypes = methodType.getArgumentTypes(); // The types of all the arguments of the fix method
-
         if (!currentMethodIsPublicAndStatic) {
             warnInvalidFix("Fix method must be public and static.");
             return;
         }
+
+        ASMFix.Builder builder = ASMFix.newBuilder();
+        Type methodType = Type.getMethodType(currentFixMethodDescriptor);
+        Type[] argumentTypes = methodType.getArgumentTypes(); // The types of all the arguments of the fix method
+
 
         if (argumentTypes.length < 1) {
             warnInvalidFix("Fix method has no arguments. First argument of a fix method must be a of the type of the target class.");
