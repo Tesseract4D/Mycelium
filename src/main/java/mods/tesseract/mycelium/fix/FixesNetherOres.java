@@ -1,4 +1,4 @@
-package net.tclproject.mysteriumlib.fix;
+package mods.tesseract.mycelium.fix;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;

@@ -1,4 +1,4 @@
-package net.tclproject.mysteriumlib.fix;
+package mods.tesseract.mycelium.fix;
 
 import chylex.hee.render.model.ModelEndermanHeadBiped;
 import net.minecraft.client.entity.AbstractClientPlayer;

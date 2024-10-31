@@ -1,4 +1,4 @@
-package net.tclproject.mysteriumlib.fix;
+package mods.tesseract.mycelium.fix;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
