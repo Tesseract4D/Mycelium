@@ -131,15 +131,21 @@ public abstract class FixInserter extends AdviceAdapter {
     public static class OnInvokeInserter extends FixInserter {
         private String method;
         private int n;
+        private boolean m;
 
         public OnInvokeInserter(MethodVisitor mv, int access, String name, String desc, ASMFix fix, FixInserterClassVisitor cv, String method, int n) {
             super(mv, access, name, desc, fix, cv);
-            this.method = method;
+            if (method.charAt(0) == '+') {
+                this.m = true;
+                this.method = method.substring(1);
+            } else
+                this.method = method;
             this.n = n;
         }
 
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+            if (!m) super.visitMethodInsn(opcode, owner, name, desc, itf);
             if (CustomLoadingPlugin.isObfuscated()) {
                 String deobfName = CustomClassTransformer.methodsMap.get(CustomClassTransformer.getMethodIndex(name));
                 if (deobfName != null)
@@ -148,7 +154,7 @@ public abstract class FixInserter extends AdviceAdapter {
             if (method.equals(owner + ";" + name + desc))
                 if (n != -1 && (n == -2 || n-- == 0))
                     insertFix();
-            super.visitMethodInsn(opcode, owner, name, desc, itf);
+            if (m) super.visitMethodInsn(opcode, owner, name, desc, itf);
         }
     }
 }
