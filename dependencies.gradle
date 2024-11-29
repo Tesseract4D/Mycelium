@@ -35,11 +35,4 @@
  */
 dependencies {
     runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.5.4-GTNH:dev")
-    compileOnly "maven.modrinth:gtnhlib:0.3.2"
-    //implementation "curse.maven:planetguylib-225256:2305574-deobf-sources-api"
-    //implementation "curse.maven:remain-in-motion-228462:2281430-deobf-sources-api"
-    compileOnly files("libs/HardcoreEnderExpansion-1.10.1-GTNH.jar")
-    compileOnly "maven.modrinth:etfuturum:2.6.0"
-    implementation "curse.maven:cofh-core-69162:2388750-deobf-sources-api"
-    implementation "curse.maven:netherores-66675:2277488-deobf-sources-api"
 }
