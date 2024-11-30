@@ -1,6 +1,5 @@
 package cn.tesseract.mycelium.lua;
 
-import cn.tesseract.mycelium.Mycelium;
 import cn.tesseract.mycelium.asm.AsmHook;
 import org.objectweb.asm.*;
 
@@ -14,7 +13,7 @@ public class LuaHookVisitor {
 
     public static byte[] visit() {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, Mycelium.luaHookClass.replace('.', '/'), null, "java/lang/Object", null);
+        cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, LuaHookLib.luaHookClass.replace('.', '/'), null, "java/lang/Object", null);
 
         MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
         mv.visitCode();
@@ -67,7 +66,7 @@ public class LuaHookVisitor {
         for (int j : stores) {
             mv.visitVarInsn(ALOAD, j);
         }
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "cn/tesseract/mycelium/js/LuaProxy", "invokeScript", desc2.toString(), false);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "cn/tesseract/mycelium/lua/LuaBridge", "invokeScript", desc2.toString(), false);
         if (rt.getSort() != VOID) {
             injectObjectToPrimitive(mv, rt);
         }
