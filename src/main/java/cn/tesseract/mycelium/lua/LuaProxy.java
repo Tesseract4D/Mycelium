@@ -1,12 +1,23 @@
 package cn.tesseract.mycelium.lua;
 
+import org.luaj.vm2.LuaFunction;
+import org.luaj.vm2.LuaUserdata;
+import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.Varargs;
+import org.luaj.vm2.lib.jse.CoerceJavaToLua;
+import org.luaj.vm2.lib.jse.CoerceLuaToJava;
+
 import java.util.ArrayList;
 
 public class LuaProxy {
-    public static ArrayList cachedFunctions = new ArrayList<>();
+    public static ArrayList<LuaFunction> cachedFunctions = new ArrayList<>();
 
-    public synchronized static Object invokeScriptAll(int method, Object... a) {
-        return null;
+    public static Object invokeScriptAll(int method, Object... a) {
+        for (int i = 0; i < a.length; i++) {
+            a[i] = CoerceJavaToLua.coerce(a[i]);
+        }
+        Varargs results = cachedFunctions.get(method).invoke((LuaValue[]) a);
+        return CoerceLuaToJava.coerce(results.arg1(), (Class) ((LuaUserdata) results.arg(1)).m_instance);
     }
 
     public static Object invokeScript(int method, Object a0) {
