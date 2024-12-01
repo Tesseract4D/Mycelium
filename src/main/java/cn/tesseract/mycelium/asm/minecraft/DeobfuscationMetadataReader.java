@@ -33,7 +33,7 @@ public class DeobfuscationMetadataReader extends ClassMetadataReader {
 
     @Override
     protected boolean checkSameMethod(String sourceName, String sourceDesc, String targetName, String targetDesc) {
-        return checkSameMethod(sourceName, targetName) && sourceDesc.equals(targetDesc);
+        return HookLibPlugin.getMethodMcpName(sourceName).equals(targetName) && sourceDesc.equals(targetDesc);
     }
 
     // Фордж и прочее могут своими патчами добавлять методы, которые нужно уметь оверрайдить хуками.
@@ -76,16 +76,4 @@ public class DeobfuscationMetadataReader extends ClassMetadataReader {
         }
         return type;
     }
-
-    private static boolean checkSameMethod(String srgName, String mcpName) {
-        if (HookLibPlugin.getObfuscated() && MinecraftClassTransformer.instance != null) {
-            int methodId = MinecraftClassTransformer.getMethodId(srgName);
-            String remappedName = MinecraftClassTransformer.instance.getMethodNames().get(methodId);
-            if (remappedName != null && remappedName.equals(mcpName)) {
-                return true;
-            }
-        }
-        return srgName.equals(mcpName);
-    }
-
 }

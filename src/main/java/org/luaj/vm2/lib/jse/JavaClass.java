@@ -21,19 +21,15 @@
 ******************************************************************************/
 package org.luaj.vm2.lib.jse;
 
+import cn.tesseract.mycelium.asm.minecraft.HookLibPlugin;
+import org.luaj.vm2.LuaValue;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-
-import org.luaj.vm2.LuaValue;
 
 /**
  * LuaValue that represents a Java class.
@@ -79,7 +75,7 @@ public class JavaClass extends JavaInstance implements CoerceJavaToLua.Coercion 
 			Field[] f = ((Class) m_instance).getFields();
 			for (Field fi : f) {
 				if (Modifier.isPublic(fi.getModifiers())) {
-					m.put(LuaValue.valueOf(fi.getName()), fi);
+					m.put(LuaValue.valueOf(HookLibPlugin.getFieldMcpName(fi.getName())), fi);
 					try {
 						if (!fi.isAccessible())
 							fi.setAccessible(true);
@@ -98,7 +94,7 @@ public class JavaClass extends JavaInstance implements CoerceJavaToLua.Coercion 
 			Method[] m = ((Class) m_instance).getMethods();
 			for (Method mi : m) {
 				if (Modifier.isPublic(mi.getModifiers())) {
-					String name = mi.getName();
+					String name = HookLibPlugin.getFieldMcpName(mi.getName());
 					List list = (List) namedlists.get(name);
 					if (list == null)
 						namedlists.put(name, list = new ArrayList());

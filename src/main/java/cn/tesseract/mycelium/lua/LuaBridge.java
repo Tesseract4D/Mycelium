@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 public class LuaBridge {
     public static ArrayList<LuaValue> cachedFunctions = new ArrayList<>();
+    public static ArrayList<Class<?>> returnTypes = new ArrayList<>();
 
     public static Object invokeScriptAll(int method, Object... a) {
         LuaValue[] b = new LuaValue[a.length];
@@ -16,7 +17,7 @@ public class LuaBridge {
             b[i] = CoerceJavaToLua.coerce(a[i]);
         }
         Varargs results = cachedFunctions.get(method).invoke(b);
-        return CoerceLuaToJava.coerce(results.arg1(), Object.class);
+        return CoerceLuaToJava.coerce(results.arg1(), returnTypes.get(method));
     }
 
     public static Object invokeScript(int method, Object a0) {

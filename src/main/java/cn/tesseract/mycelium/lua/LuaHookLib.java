@@ -2,6 +2,8 @@ package cn.tesseract.mycelium.lua;
 
 import cn.tesseract.mycelium.MyceliumCoreMod;
 import cn.tesseract.mycelium.asm.*;
+import cpw.mods.fml.common.eventhandler.Event;
+import cpw.mods.fml.common.eventhandler.EventPriority;
 import org.apache.commons.io.FileUtils;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
@@ -9,12 +11,34 @@ import org.objectweb.asm.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
 public class LuaHookLib {
     public static String luaHookClass = "cn.tesseract.mycelium.lua.LuaHook";
     public static int hookIndex = 0;
+
+    public static void registerLuaEvent(Class<?> eventType, LuaValue fn) {
+        registerLuaEvent(eventType, 0, EventPriority.NORMAL, fn);
+    }
+
+    public static void registerLuaEvent(Class<?> eventType, int busID, LuaValue fn) {
+        registerLuaEvent(eventType, busID, EventPriority.NORMAL, fn);
+    }
+
+    public static void registerLuaEvent(Class<?> eventType, int busID, EventPriority priority, LuaValue fn) {
+        if (!fn.isfunction())
+            throw new IllegalArgumentException(fn.tojstring() + " not a function!");
+        try {
+            Constructor<?> ctr = eventType.getConstructor();
+            ctr.setAccessible(true);
+            Event event = (Event) ctr.newInstance();
+            event.getListenerList().register(busID, priority, new LuaEventListener(fn));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void registerLuaHook(LuaValue fn, LuaTable obj) {
         if (!fn.isfunction())
@@ -107,6 +131,8 @@ public class LuaHookLib {
         else if (returnCondition == ReturnCondition.ON_TRUE) methodType = Type.BOOLEAN_TYPE;
         else methodType = Type.VOID_TYPE;
 
+        LuaBridge.returnTypes.add(typeToClass(methodType));
+
         if (returnCondition != ReturnCondition.NEVER) {
             Object primitiveConstant = map.get("returnConstant");
             if (primitiveConstant != null) {
@@ -150,6 +176,7 @@ public class LuaHookLib {
 
         if (map.containsKey("returnAnotherMethod")) {
             LuaBridge.cachedFunctions.add((LuaValue) map.get("returnAnotherMethod"));
+            LuaBridge.returnTypes.add(typeToClass(targetReturnType));
             String n = hookMethod + hookIndex++;
             LuaHookVisitor.createMethod(n, hookDesc.toString() + targetReturnType.getDescriptor());
         }
@@ -165,6 +192,19 @@ public class LuaHookLib {
             case LuaValue.TUSERDATA -> luajValue.checkuserdata(Object.class);
             case LuaValue.TNUMBER -> luajValue.isinttype() ? (Object) luajValue.toint() : (Object) luajValue.todouble();
             default -> luajValue;
+        };
+    }
+
+    public static Class typeToClass(Type t) {
+        return switch (t.getSort()) {
+            case Type.INT -> Integer.class;
+            case Type.FLOAT -> Float.class;
+            case Type.DOUBLE -> Double.class;
+            case Type.SHORT -> Short.class;
+            case Type.LONG -> Long.class;
+            case Type.BYTE -> Byte.class;
+            case Type.CHAR -> Character.class;
+            default -> Object.class;
         };
     }
 
