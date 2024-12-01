@@ -8,6 +8,8 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 
@@ -18,10 +20,11 @@ public class Mycelium {
     public static final String MODID = "mycelium";
     public static final String NAME = "Mycelium";
     public static final String VERSION = "2.0";
+    public static final Logger logger = LogManager.getLogger(MODID);
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent e) {
-        LuaValue func = MyceliumCoreMod.globals.get("init");
+        LuaValue func = MyceliumCoreMod.getLuaGlobals().get("init");
         if (!func.isnil())
             func.invoke(CoerceJavaToLua.coerce(e));
     }
@@ -42,14 +45,14 @@ public class Mycelium {
 
         e.getModMetadata().description = "A library mod used for multiple things including easy ASM fixes and more.";
 
-        LuaValue func = MyceliumCoreMod.globals.get("preInit");
+        LuaValue func = MyceliumCoreMod.getLuaGlobals().get("preInit");
         if (!func.isnil())
             func.invoke(CoerceJavaToLua.coerce(e));
     }
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent e) {
-        LuaValue func = MyceliumCoreMod.globals.get("postInit");
+        LuaValue func = MyceliumCoreMod.getLuaGlobals().get("postInit");
         if (!func.isnil())
             func.invoke(CoerceJavaToLua.coerce(e));
     }

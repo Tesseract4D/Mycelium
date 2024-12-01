@@ -6,7 +6,6 @@ import cn.tesseract.mycelium.lua.LuaHookLib;
 import cn.tesseract.mycelium.lua.LuaHookVisitor;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import org.apache.commons.io.FileUtils;
 import org.luaj.vm2.Globals;
@@ -23,11 +22,10 @@ import java.security.CodeSource;
 import java.security.SecureClassLoader;
 
 public class MyceliumCoreMod extends HookLoader {
-    public static Globals globals = JsePlatform.standardGlobals();
+    private static Globals globals;
     public static Method defineClass;
 
     static {
-        globals.set("hookLib", CoerceJavaToLua.coerce(LuaHookLib.class));
         try {
             Field f = LaunchClassLoader.class.getDeclaredField("cachedClasses");
             f.setAccessible(true);
@@ -36,6 +34,15 @@ public class MyceliumCoreMod extends HookLoader {
         } catch (NoSuchFieldException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Globals getLuaGlobals() {
+        if (globals == null) {
+            globals = JsePlatform.standardGlobals();
+            globals.set("hookLib", CoerceJavaToLua.coerce(LuaHookLib.class));
+            globals.set("log", CoerceJavaToLua.coerce(Mycelium.logger));
+        }
+        return globals;
     }
 
     @Override
@@ -51,17 +58,17 @@ public class MyceliumCoreMod extends HookLoader {
             File[] files = scriptDir.listFiles();
             if (files != null)
                 for (File file : files) {
-                    String script = "";
+                    StringBuilder sb = new StringBuilder();
                     if (file.isFile() && file.getName().endsWith(".lua"))
-                        script = FileUtils.readFileToString(file);
-                    if (!script.isEmpty()) {
-                        LuaValue chunk = globals.load(script);
+                        sb.append(FileUtils.readFileToString(file));
+                    if (sb.length() != 0) {
+                        LuaValue chunk = getLuaGlobals().load(sb.toString());
                         chunk.call();
                     }
                 }
 
             byte[] data = LuaHookVisitor.visit();
-            LuaHookLib.dumpClassFile(data);
+            //LuaHookLib.dumpClassFile(data);
             defineClass.invoke(Launch.classLoader, LuaHookLib.luaHookClass, data, 0, data.length, null);
         } catch (IllegalAccessException | InvocationTargetException | IOException e) {
             throw new RuntimeException(e);

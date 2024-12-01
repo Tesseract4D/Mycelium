@@ -94,7 +94,7 @@ public class JavaClass extends JavaInstance implements CoerceJavaToLua.Coercion 
 			Method[] m = ((Class) m_instance).getMethods();
 			for (Method mi : m) {
 				if (Modifier.isPublic(mi.getModifiers())) {
-					String name = HookLibPlugin.getFieldMcpName(mi.getName());
+					String name = HookLibPlugin.getMethodMcpName(mi.getName());
 					List list = (List) namedlists.get(name);
 					if (list == null)
 						namedlists.put(name, list = new ArrayList());

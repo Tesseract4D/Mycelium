@@ -21,7 +21,7 @@ public class LuaHookLib {
     public static int hookIndex = 0;
 
     public static void importClass(String className) throws ClassNotFoundException {
-        MyceliumCoreMod.globals.set(className.substring(className.lastIndexOf('.') + 1), CoerceJavaToLua.coerce(Class.forName(className)));
+        MyceliumCoreMod.getLuaGlobals().set(className.substring(className.lastIndexOf('.') + 1), CoerceJavaToLua.coerce(Class.forName(className)));
     }
 
     public static void registerLuaEvent(Class<?> eventType, LuaValue fn) {
