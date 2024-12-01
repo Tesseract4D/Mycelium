@@ -7,6 +7,7 @@ import cpw.mods.fml.common.eventhandler.EventPriority;
 import org.apache.commons.io.FileUtils;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 import org.objectweb.asm.*;
 
 import java.io.File;
@@ -18,6 +19,10 @@ import java.util.Map;
 public class LuaHookLib {
     public static String luaHookClass = "cn.tesseract.mycelium.lua.LuaHook";
     public static int hookIndex = 0;
+
+    public static void importClass(String className) throws ClassNotFoundException {
+        MyceliumCoreMod.globals.set(className.substring(className.lastIndexOf('.') + 1), CoerceJavaToLua.coerce(Class.forName(className)));
+    }
 
     public static void registerLuaEvent(Class<?> eventType, LuaValue fn) {
         registerLuaEvent(eventType, 0, EventPriority.NORMAL, fn);

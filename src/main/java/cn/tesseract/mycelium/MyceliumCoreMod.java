@@ -7,6 +7,7 @@ import cn.tesseract.mycelium.lua.LuaHookVisitor;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
 import org.apache.commons.io.FileUtils;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaValue;
@@ -65,5 +66,9 @@ public class MyceliumCoreMod extends HookLoader {
         } catch (IllegalAccessException | InvocationTargetException | IOException e) {
             throw new RuntimeException(e);
         }
+
+        Configuration cfg = new Configuration(new File(Launch.minecraftHome, "config/mycelium.cfg"));
+        if (cfg.getBoolean("creativeNoclip", "general", true, "Noclip in creative mode when fly."))
+            registerHookContainer("cn.tesseract.mycelium.hook.CreativeHook");
     }
 }

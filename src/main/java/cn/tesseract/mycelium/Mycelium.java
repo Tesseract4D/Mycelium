@@ -4,6 +4,9 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.client.event.DrawBlockHighlightEvent;
+import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
@@ -49,6 +52,18 @@ public class Mycelium {
         LuaValue func = MyceliumCoreMod.globals.get("postInit");
         if (!func.isnil())
             func.invoke(CoerceJavaToLua.coerce(e));
+    }
+
+    @SubscribeEvent
+    public void onRenderBlockOverlay(RenderBlockOverlayEvent e) {
+        if (e.player.noClip)
+            e.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public void onBlockHighlight(DrawBlockHighlightEvent e) {
+        if (e.player.isEntityInsideOpaqueBlock())
+            e.setCanceled(true);
     }
 }
 
