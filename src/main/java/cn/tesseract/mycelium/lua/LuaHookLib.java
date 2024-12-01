@@ -41,7 +41,7 @@ public class LuaHookLib {
             Event event = (Event) ctr.newInstance();
             event.getListenerList().register(busID, priority, new LuaEventListener(fn));
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -200,7 +200,7 @@ public class LuaHookLib {
         };
     }
 
-    public static Class typeToClass(Type t) {
+    public static Class<?> typeToClass(Type t) {
         return switch (t.getSort()) {
             case Type.INT -> Integer.class;
             case Type.FLOAT -> Float.class;

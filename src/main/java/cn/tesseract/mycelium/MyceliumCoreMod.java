@@ -4,6 +4,7 @@ import cn.tesseract.mycelium.asm.minecraft.HookLoader;
 import cn.tesseract.mycelium.asm.minecraft.PrimaryClassTransformer;
 import cn.tesseract.mycelium.lua.LuaHookLib;
 import cn.tesseract.mycelium.lua.LuaHookVisitor;
+import cn.tesseract.mycelium.lua.LuaLogger;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.minecraftforge.common.config.Configuration;
@@ -40,7 +41,7 @@ public class MyceliumCoreMod extends HookLoader {
         if (globals == null) {
             globals = JsePlatform.standardGlobals();
             globals.set("hookLib", CoerceJavaToLua.coerce(LuaHookLib.class));
-            globals.set("log", CoerceJavaToLua.coerce(Mycelium.logger));
+            globals.set("log", CoerceJavaToLua.coerce(new LuaLogger()));
         }
         return globals;
     }

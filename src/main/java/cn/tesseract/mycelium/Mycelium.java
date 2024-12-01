@@ -20,7 +20,6 @@ public class Mycelium {
     public static final String MODID = "mycelium";
     public static final String NAME = "Mycelium";
     public static final String VERSION = "2.0";
-    public static final Logger logger = LogManager.getLogger(MODID);
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent e) {
