@@ -1,5 +1,6 @@
 package cn.tesseract.mycelium.asm;
 
+import cn.tesseract.mycelium.asm.minecraft.HookLibPlugin;
 import net.minecraft.launchwrapper.Launch;
 import org.apache.commons.io.FileUtils;
 import org.objectweb.asm.*;
@@ -63,7 +64,7 @@ public class MiscHelper {
     }
 
     public static String getMethodDescriptor(Method m) {
-        return "L" + m.getDeclaringClass().getName().replace('.', '/') + ";" + m.getName() + Type.getMethodDescriptor(m);
+        return "L" + m.getDeclaringClass().getName().replace('.', '/') + ";" + HookLibPlugin.getMethodMcpName(m.getName()) + Type.getMethodDescriptor(m);
     }
 
     public static List<String> getMethodDescriptors(Class<?> c) {

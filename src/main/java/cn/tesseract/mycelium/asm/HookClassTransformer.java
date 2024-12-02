@@ -60,7 +60,10 @@ public class HookClassTransformer implements ClassFileTransformer {
                 cr.accept(hooksWriter, java7 ? ClassReader.SKIP_FRAMES : ClassReader.EXPAND_FRAMES);
                 bytecode = cw.toByteArray();
                 for (AsmHook hook : hooksWriter.injectedHooks) {
-                    logger.debug("Patching method " + hook.getPatchedMethodName());
+                    if (hook.injected)
+                        logger.debug("Patching method " + hook.getPatchedMethodName());
+                    else
+                        logger.warning(hook + " not injected!");
                 }
                 hooks.removeAll(hooksWriter.injectedHooks);
             } catch (Exception e) {

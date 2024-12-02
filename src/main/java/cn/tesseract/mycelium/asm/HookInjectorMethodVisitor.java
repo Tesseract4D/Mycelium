@@ -1,5 +1,6 @@
 package cn.tesseract.mycelium.asm;
 
+import cn.tesseract.mycelium.asm.minecraft.HookLibPlugin;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -35,6 +36,7 @@ public abstract class HookInjectorMethodVisitor extends AdviceAdapter {
         if (!cv.visitingHook) {
             cv.visitingHook = true;
             hook.inject(this);
+            hook.injected = true;
             cv.visitingHook = false;
         }
     }
@@ -103,9 +105,9 @@ public abstract class HookInjectorMethodVisitor extends AdviceAdapter {
     }
 
     public static class Invoke extends HookInjectorMethodVisitor {
-        private String method;
+        private final String method;
         private int n;
-        private boolean m;
+        private final boolean m;
 
         public Invoke(MethodVisitor mv, int access, String name, String desc,
                       AsmHook hook, HookInjectorClassVisitor cv, String method, int n, boolean injectOnExit) {
@@ -118,7 +120,7 @@ public abstract class HookInjectorMethodVisitor extends AdviceAdapter {
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
             if (m) super.visitMethodInsn(opcode, owner, name, desc, itf);
-            if (method.equals("L" + owner + ";" + name + desc))
+            if (method.equals("L" + owner + ";" + HookLibPlugin.getMethodMcpName(name) + desc))
                 if (n != -1 && (n == -2 || n-- == 0))
                     visitHook();
             if (!m) super.visitMethodInsn(opcode, owner, name, desc, itf);

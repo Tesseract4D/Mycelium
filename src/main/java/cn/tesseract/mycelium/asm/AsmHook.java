@@ -23,7 +23,7 @@ import static org.objectweb.asm.Type.*;
 public class AsmHook implements Cloneable, Comparable<AsmHook> {
 
     public String targetClassName; // через точки
-    public boolean customClassName; // через точки
+    public boolean customClassName;
     public String targetMethodName;
     public List<Type> targetMethodParameters = new ArrayList<Type>(2);
     public Type targetMethodReturnType; //если не задано, то не проверяется
@@ -55,6 +55,7 @@ public class AsmHook implements Cloneable, Comparable<AsmHook> {
 
     public boolean createMethod;
     public boolean isMandatory;
+    public boolean injected;
 
     protected String getTargetClassName() {
         return targetClassName;
