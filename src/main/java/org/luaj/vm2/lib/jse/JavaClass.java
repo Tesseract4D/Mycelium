@@ -73,6 +73,8 @@ public class JavaClass extends JavaInstance implements CoerceJavaToLua.Coercion 
             Map m = new HashMap();
             Field[] f = ((Class) m_instance).getFields();
             for (Field fi : f) {
+                if (!fi.isAccessible())
+                    fi.setAccessible(true);
                 m.put(LuaValue.valueOf(HookLibPlugin.getFieldMcpName(fi.getName())), fi);
             }
             f = ((Class) m_instance).getDeclaredFields();
@@ -95,6 +97,8 @@ public class JavaClass extends JavaInstance implements CoerceJavaToLua.Coercion 
             Map namedlists = new HashMap();
             Method[] m = ((Class) m_instance).getMethods();
             for (Method mi : m) {
+                if (!mi.isAccessible())
+                    mi.setAccessible(true);
                 String name = HookLibPlugin.getMethodMcpName(mi.getName());
                 List list = (List) namedlists.get(name);
                 if (list == null) namedlists.put(name, list = new ArrayList());

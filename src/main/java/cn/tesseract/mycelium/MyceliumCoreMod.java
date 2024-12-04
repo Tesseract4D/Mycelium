@@ -1,12 +1,16 @@
 package cn.tesseract.mycelium;
 
+import cn.tesseract.mycelium.asm.MiscHelper;
 import cn.tesseract.mycelium.asm.minecraft.HookLoader;
 import cn.tesseract.mycelium.asm.minecraft.PrimaryClassTransformer;
 import cn.tesseract.mycelium.lua.LuaHookLib;
 import cn.tesseract.mycelium.lua.LuaHookVisitor;
 import cn.tesseract.mycelium.lua.LuaLogger;
+import cn.tesseract.mycelium.lua.LuaReflection;
+import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
+import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
 import org.apache.commons.io.FileUtils;
 import org.luaj.vm2.Globals;
@@ -42,6 +46,7 @@ public class MyceliumCoreMod extends HookLoader {
             globals = JsePlatform.standardGlobals();
             globals.set("hookLib", CoerceJavaToLua.coerce(LuaHookLib.class));
             globals.set("log", CoerceJavaToLua.coerce(new LuaLogger()));
+            globals.set("reflection", CoerceJavaToLua.coerce(new LuaReflection()));
         }
         return globals;
     }
@@ -78,5 +83,6 @@ public class MyceliumCoreMod extends HookLoader {
         Configuration cfg = new Configuration(new File(Launch.minecraftHome, "config/mycelium.cfg"));
         if (cfg.getBoolean("creativeNoclip", "general", true, "Noclip in creative mode when fly."))
             registerHookContainer("cn.tesseract.mycelium.hook.CreativeHook");
+        registerHookContainer("cn.tesseract.mycelium.hook.ForgeEventHook");
     }
 }

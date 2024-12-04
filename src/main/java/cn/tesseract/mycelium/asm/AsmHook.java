@@ -683,7 +683,7 @@ public class AsmHook implements Cloneable, Comparable<AsmHook> {
                 returnType == LONG_TYPE && !(constant instanceof Long) ||
                 returnType == FLOAT_TYPE && !(constant instanceof Float) ||
                 returnType == DOUBLE_TYPE && !(constant instanceof Double)) {
-                throw new IllegalArgumentException("Given object class does not math target method return type.");
+                throw new IllegalArgumentException("Given object class does not match target method return type.");
             }
 
             AsmHook.this.primitiveConstant = constant;

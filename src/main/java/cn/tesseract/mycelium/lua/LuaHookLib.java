@@ -2,8 +2,7 @@ package cn.tesseract.mycelium.lua;
 
 import cn.tesseract.mycelium.MyceliumCoreMod;
 import cn.tesseract.mycelium.asm.*;
-import cpw.mods.fml.common.eventhandler.Event;
-import cpw.mods.fml.common.eventhandler.EventPriority;
+import cn.tesseract.mycelium.hook.ForgeEventHook;
 import org.apache.commons.io.FileUtils;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
@@ -12,7 +11,7 @@ import org.objectweb.asm.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,24 +24,8 @@ public class LuaHookLib {
     }
 
     public static void registerLuaEvent(Class<?> eventType, LuaValue fn) {
-        registerLuaEvent(eventType, 0, EventPriority.NORMAL, fn);
-    }
-
-    public static void registerLuaEvent(Class<?> eventType, int busID, LuaValue fn) {
-        registerLuaEvent(eventType, busID, EventPriority.NORMAL, fn);
-    }
-
-    public static void registerLuaEvent(Class<?> eventType, int busID, EventPriority priority, LuaValue fn) {
-        if (!fn.isfunction())
-            throw new IllegalArgumentException(fn.tojstring() + " not a function!");
-        try {
-            Constructor<?> ctr = eventType.getConstructor();
-            ctr.setAccessible(true);
-            Event event = (Event) ctr.newInstance();
-            event.getListenerList().register(busID, priority, new LuaEventListener(fn));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        ArrayList<LuaValue> list = ForgeEventHook.luaEventList.computeIfAbsent(eventType, k -> new ArrayList<>());
+        list.add(fn);
     }
 
     public static void registerLuaHook(LuaValue fn, LuaTable obj) {
@@ -142,9 +125,19 @@ public class LuaHookLib {
             Object primitiveConstant = map.get("returnConstant");
             if (primitiveConstant != null) {
                 builder.setReturnValue(ReturnValue.PRIMITIVE_CONSTANT);
+                switch (targetReturnType.getSort()) {
+                    case Type.BYTE -> primitiveConstant = ((Number) primitiveConstant).byteValue();
+                    case Type.SHORT -> primitiveConstant = ((Number) primitiveConstant).shortValue();
+                    case Type.INT -> primitiveConstant = ((Number) primitiveConstant).intValue();
+                    case Type.FLOAT -> primitiveConstant = ((Number) primitiveConstant).floatValue();
+                    case Type.LONG -> primitiveConstant = ((Number) primitiveConstant).longValue();
+                    case Type.DOUBLE -> primitiveConstant = ((Number) primitiveConstant).doubleValue();
+                }
                 builder.setPrimitiveConstant(primitiveConstant);
             } else if (Boolean.TRUE.equals(map.get("returnNull"))) {
                 builder.setReturnValue(ReturnValue.NULL);
+            } else if (targetReturnType == Type.VOID_TYPE) {
+                builder.setReturnValue(ReturnValue.VOID);
             } else if (map.containsKey("returnAnotherMethod")) {
                 builder.setReturnValue(ReturnValue.ANOTHER_METHOD_RETURN_VALUE);
                 builder.setReturnMethod(hookMethod + (hookIndex + 1));
@@ -156,14 +149,12 @@ public class LuaHookLib {
         builder.setHookMethodReturnType(methodType);
 
         if (returnCondition == ReturnCondition.ON_TRUE && methodType != Type.BOOLEAN_TYPE) {
-            System.out.println("Hook method must return boolean if returnCodition is ON_TRUE.");
-            return;
+            throw new IllegalArgumentException("Hook method must return boolean if returnCodition is ON_TRUE.");
         }
         if ((returnCondition == ReturnCondition.ON_NULL || returnCondition == ReturnCondition.ON_NOT_NULL) &&
                 methodType.getSort() != Type.OBJECT &&
                 methodType.getSort() != Type.ARRAY) {
-            System.out.println("Hook method must return object if returnCodition is ON_NULL or ON_NOT_NULL.");
-            return;
+            throw new IllegalArgumentException("Hook method must return object if returnCodition is ON_NULL or ON_NOT_NULL.");
         }
 
         if (map.containsKey("priority")) {
@@ -209,6 +200,7 @@ public class LuaHookLib {
             case Type.LONG -> Long.class;
             case Type.BYTE -> Byte.class;
             case Type.CHAR -> Character.class;
+            case Type.BOOLEAN -> Boolean.class;
             default -> Object.class;
         };
     }
