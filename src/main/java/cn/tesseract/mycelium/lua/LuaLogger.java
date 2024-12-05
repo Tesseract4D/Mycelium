@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.luaj.vm2.LuaValue;
 
 public class LuaLogger {
-    private static final Logger logger = LogManager.getLogger("Lua");
+    public static final Logger logger = LogManager.getLogger("Lua");
 
     public void info(String message) {
         logger.info(message);

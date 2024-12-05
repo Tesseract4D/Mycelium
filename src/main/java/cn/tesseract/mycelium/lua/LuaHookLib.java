@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LuaHookLib {
-    public static String luaHookClass = "cn.tesseract.mycelium.lua.LuaHook";
+    public static String luaHookClass = "cn.tesseract.mycelium.lua.LuaJavaHook";
     public static int hookIndex = 0;
 
     public static void importClass(String className) throws ClassNotFoundException {
@@ -28,10 +28,9 @@ public class LuaHookLib {
         list.add(fn);
     }
 
-    public static void registerLuaHook(LuaValue fn, LuaTable obj) {
+    public static void registerLuaHook(String name, LuaValue fn, LuaTable obj) {
         if (!fn.isfunction())
             throw new IllegalArgumentException(fn.tojstring() + " not a function!");
-        LuaBridge.cachedFunctions.add(fn);
 
         AsmHook.Builder builder = AsmHook.newBuilder();
 
@@ -40,10 +39,10 @@ public class LuaHookLib {
             map.put(key.tojstring(), toJava(obj.get(key)));
         }
 
-        if (!map.containsKey("targetDesc"))
-            throw new IllegalArgumentException("targetDesc must be set!");
+        if (!map.containsKey("targetMethod"))
+            throw new IllegalArgumentException("targetMethod must be set!");
 
-        String s = (String) map.get("targetDesc");
+        String s = (String) map.get("targetMethod");
         int i = s.indexOf(';') + 1;
         Type targetClass = Type.getType(s.substring(0, i));
         s = s.substring(i);
@@ -119,7 +118,7 @@ public class LuaHookLib {
         else if (returnCondition == ReturnCondition.ON_TRUE) methodType = Type.BOOLEAN_TYPE;
         else methodType = Type.VOID_TYPE;
 
-        LuaBridge.returnTypes.add(typeToClass(methodType));
+        LuaBridge.newLuaHook(new LuaHook(name, fn, typeToClass(methodType)), hookIndex);
 
         if (returnCondition != ReturnCondition.NEVER) {
             Object primitiveConstant = map.get("returnConstant");
@@ -171,8 +170,7 @@ public class LuaHookLib {
         LuaHookVisitor.createMethod(hookMethod + hookIndex++, hookDesc.toString() + methodType.getDescriptor());
 
         if (map.containsKey("returnAnotherMethod")) {
-            LuaBridge.cachedFunctions.add((LuaValue) map.get("returnAnotherMethod"));
-            LuaBridge.returnTypes.add(typeToClass(targetReturnType));
+            LuaBridge.newLuaHook(new LuaHook(name, (LuaValue) map.get("returnAnotherMethod"), typeToClass(targetReturnType)), hookIndex);
             String n = hookMethod + hookIndex++;
             LuaHookVisitor.createMethod(n, hookDesc.toString() + targetReturnType.getDescriptor());
         }
@@ -193,13 +191,13 @@ public class LuaHookLib {
 
     public static Class<?> typeToClass(Type t) {
         return switch (t.getSort()) {
-            case Type.INT -> Integer.class;
-            case Type.FLOAT -> Float.class;
-            case Type.DOUBLE -> Double.class;
-            case Type.SHORT -> Short.class;
-            case Type.LONG -> Long.class;
             case Type.BYTE -> Byte.class;
             case Type.CHAR -> Character.class;
+            case Type.SHORT -> Short.class;
+            case Type.INT -> Integer.class;
+            case Type.LONG -> Long.class;
+            case Type.FLOAT -> Float.class;
+            case Type.DOUBLE -> Double.class;
             case Type.BOOLEAN -> Boolean.class;
             default -> Object.class;
         };

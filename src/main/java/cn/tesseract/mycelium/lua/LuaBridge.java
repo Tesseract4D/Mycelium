@@ -1,23 +1,40 @@
 package cn.tesseract.mycelium.lua;
 
+import cn.tesseract.mycelium.MyceliumCoreMod;
+import org.luaj.vm2.LuaInteger;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 import org.luaj.vm2.lib.jse.CoerceLuaToJava;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class LuaBridge {
-    public static ArrayList<LuaValue> cachedFunctions = new ArrayList<>();
-    public static ArrayList<Class<?>> returnTypes = new ArrayList<>();
+    private static final ArrayList<LuaHook> luaHooks = new ArrayList<>();
+    private static final HashMap<String, Integer> hookMap = new HashMap<>();
 
     public static Object invokeScriptAll(int method, Object... a) {
         LuaValue[] b = new LuaValue[a.length];
         for (int i = 0; i < a.length; i++) {
             b[i] = CoerceJavaToLua.coerce(a[i]);
         }
-        Varargs results = cachedFunctions.get(method).invoke(b);
-        return CoerceLuaToJava.coerce(results.arg1(), returnTypes.get(method));
+        LuaHook hook = luaHooks.get(method);
+        if (hook.error)
+            return hook.getDefaultReturnValue();
+        try {
+            Varargs results = hook.func.invoke(b);
+            return CoerceLuaToJava.coerce(results.arg1(), hook.returnType);
+        } catch (Exception e) {
+            LuaLogger.logger.error(e);
+            hook.error = true;
+            return hook.getDefaultReturnValue();
+        }
+    }
+
+    public static void newLuaHook(LuaHook hook, int index) {
+        luaHooks.add(hook);
+        hookMap.put(hook.name, index);
     }
 
     public static Object invokeScript(int method, Object a0) {

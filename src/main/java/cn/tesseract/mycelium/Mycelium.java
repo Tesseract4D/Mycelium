@@ -1,18 +1,13 @@
 package cn.tesseract.mycelium;
 
-import cn.tesseract.mycelium.asm.MiscHelper;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.MathHelper;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 
@@ -26,6 +21,7 @@ public class Mycelium {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent e) {
+        MyceliumCoreMod.phase = "init";
         LuaValue func = MyceliumCoreMod.getLuaGlobals().get("init");
         if (!func.isnil())
             func.invoke(CoerceJavaToLua.coerce(e));
@@ -33,6 +29,7 @@ public class Mycelium {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent e) {
+        MyceliumCoreMod.phase = "preInit";
         //MiscHelper.printMethodDescriptors(Minecraft.class);
         MinecraftForge.EVENT_BUS.register(this);
 
@@ -55,6 +52,7 @@ public class Mycelium {
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent e) {
+        MyceliumCoreMod.phase = "postInit";
         LuaValue func = MyceliumCoreMod.getLuaGlobals().get("postInit");
         if (!func.isnil())
             func.invoke(CoerceJavaToLua.coerce(e));

@@ -1,24 +1,21 @@
 package cn.tesseract.mycelium;
 
-import cn.tesseract.mycelium.asm.MiscHelper;
 import cn.tesseract.mycelium.asm.minecraft.HookLoader;
 import cn.tesseract.mycelium.asm.minecraft.PrimaryClassTransformer;
 import cn.tesseract.mycelium.lua.LuaHookLib;
 import cn.tesseract.mycelium.lua.LuaHookVisitor;
 import cn.tesseract.mycelium.lua.LuaLogger;
 import cn.tesseract.mycelium.lua.LuaReflection;
-import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
-import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
-import org.apache.commons.io.FileUtils;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 import org.luaj.vm2.lib.jse.JsePlatform;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -29,6 +26,7 @@ import java.security.SecureClassLoader;
 public class MyceliumCoreMod extends HookLoader {
     private static Globals globals;
     public static Method defineClass;
+    public static String phase = "coremod";
 
     static {
         try {
@@ -64,11 +62,8 @@ public class MyceliumCoreMod extends HookLoader {
             File[] files = scriptDir.listFiles();
             if (files != null)
                 for (File file : files) {
-                    StringBuilder sb = new StringBuilder();
-                    if (file.isFile() && file.getName().endsWith(".lua"))
-                        sb.append(FileUtils.readFileToString(file));
-                    if (sb.length() != 0) {
-                        LuaValue chunk = getLuaGlobals().load(sb.toString());
+                    if (file.isFile() && file.getName().endsWith(".lua")) {
+                        LuaValue chunk = getLuaGlobals().load(new FileReader(file), file.getName());
                         chunk.call();
                     }
                 }
