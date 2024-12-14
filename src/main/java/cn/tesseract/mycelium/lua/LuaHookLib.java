@@ -2,7 +2,6 @@ package cn.tesseract.mycelium.lua;
 
 import cn.tesseract.mycelium.MyceliumCoreMod;
 import cn.tesseract.mycelium.asm.*;
-import cn.tesseract.mycelium.hook.ForgeEventHook;
 import org.apache.commons.io.FileUtils;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
@@ -18,14 +17,22 @@ import java.util.Map;
 public class LuaHookLib {
     public static String luaHookClass = "cn.tesseract.mycelium.lua.LuaJavaHook";
     public static int hookIndex = 0;
+    public static final Map<String, ArrayList<LuaValue>> luaEventList = new HashMap<>();
 
     public static void importClass(String className) throws ClassNotFoundException {
         MyceliumCoreMod.getLuaGlobals().set(className.substring(className.lastIndexOf('.') + 1), CoerceJavaToLua.coerce(Class.forName(className)));
     }
 
-    public static void registerLuaEvent(Class<?> eventType, LuaValue fn) {
-        ArrayList<LuaValue> list = ForgeEventHook.luaEventList.computeIfAbsent(eventType, k -> new ArrayList<>());
+    public static void registerLuaEvent(String eventType, LuaValue fn) {
+        ArrayList<LuaValue> list = luaEventList.computeIfAbsent(eventType, k -> new ArrayList<>());
         list.add(fn);
+    }
+
+    public static void callLuaEvent(Object event) {
+        ArrayList<LuaValue> list;
+        if ((list = LuaHookLib.luaEventList.get(event.getClass().getName())) != null)
+            for (LuaValue func : list)
+                func.call(CoerceJavaToLua.coerce(event));
     }
 
     public static void registerLuaHook(String name, LuaValue fn, LuaTable obj) {

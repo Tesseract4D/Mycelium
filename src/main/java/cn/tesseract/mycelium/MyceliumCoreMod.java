@@ -5,7 +5,6 @@ import cn.tesseract.mycelium.asm.minecraft.PrimaryClassTransformer;
 import cn.tesseract.mycelium.lua.LuaHookLib;
 import cn.tesseract.mycelium.lua.LuaHookVisitor;
 import cn.tesseract.mycelium.lua.LuaLogger;
-import cn.tesseract.mycelium.lua.LuaReflection;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.minecraftforge.common.config.Configuration;
@@ -24,9 +23,10 @@ import java.security.CodeSource;
 import java.security.SecureClassLoader;
 
 public class MyceliumCoreMod extends HookLoader {
-    private static Globals globals;
+    public static Globals globals;
     public static Method defineClass;
     public static String phase = "coremod";
+    public static File scriptDir;
 
     static {
         try {
@@ -37,6 +37,8 @@ public class MyceliumCoreMod extends HookLoader {
         } catch (NoSuchFieldException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
+        scriptDir = new File(Launch.minecraftHome, "lua");
+        scriptDir.mkdir();
     }
 
     public static Globals getLuaGlobals() {
@@ -44,7 +46,6 @@ public class MyceliumCoreMod extends HookLoader {
             globals = JsePlatform.standardGlobals();
             globals.set("hookLib", CoerceJavaToLua.coerce(LuaHookLib.class));
             globals.set("log", CoerceJavaToLua.coerce(new LuaLogger()));
-            globals.set("reflection", CoerceJavaToLua.coerce(new LuaReflection()));
         }
         return globals;
     }
@@ -55,9 +56,12 @@ public class MyceliumCoreMod extends HookLoader {
     }
 
     @Override
+    public String getAccessTransformerClass() {
+        return MyceliumAccessTransformer.class.getName();
+    }
+
+    @Override
     protected void registerHooks() {
-        File scriptDir = new File(Launch.minecraftHome, "lua");
-        scriptDir.mkdir();
         try {
             File[] files = scriptDir.listFiles();
             if (files != null)
@@ -78,6 +82,7 @@ public class MyceliumCoreMod extends HookLoader {
         Configuration cfg = new Configuration(new File(Launch.minecraftHome, "config/mycelium.cfg"));
         if (cfg.getBoolean("creativeNoclip", "general", true, "Noclip in creative mode when fly."))
             registerHookContainer("cn.tesseract.mycelium.hook.CreativeHook");
-        registerHookContainer("cn.tesseract.mycelium.hook.ForgeEventHook");
+        if (!LuaHookLib.luaEventList.isEmpty())
+            registerHookContainer("cn.tesseract.mycelium.hook.ForgeEventHook");
     }
 }
