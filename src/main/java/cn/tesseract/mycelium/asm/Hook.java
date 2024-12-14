@@ -49,7 +49,7 @@ public @interface Hook {
 
     @Target(ElementType.PARAMETER)
     @interface LocalVariable {
-        int value();
+        int index();
     }
 
     @Target(ElementType.PARAMETER)

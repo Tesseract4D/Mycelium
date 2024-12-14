@@ -30,7 +30,7 @@ public class HookContainerParser {
 
     private static final String HOOK_DESC = Type.getDescriptor(Hook.class);
     private static final String LOCAL_DESC = Type.getDescriptor(Hook.LocalVariable.class);
-    private static final String RETURN_DESC = Type.getDescriptor(ReturnValue.class);
+    private static final String RETURN_DESC = Type.getDescriptor(Hook.ReturnValue.class);
 
     public HookContainerParser(HookClassTransformer transformer) {
         this.transformer = transformer;
