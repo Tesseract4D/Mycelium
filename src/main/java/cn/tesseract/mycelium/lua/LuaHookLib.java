@@ -108,7 +108,7 @@ public class LuaHookLib {
         }
 
         if (map.containsKey("injectOnInvoke")) {
-            builder.setInjectorFactory(new HookInjectorFactory.Invoke((String) map.get("injectOnInvoke"), map.containsKey("injectOnLine") ? line : -2, injectOnExit));
+            builder.setInjectorFactory(new HookInjectorFactory.Invoke((String) map.get("injectOnInvoke"), map.containsKey("injectOnLine") ? line : -2, injectOnExit, Boolean.TRUE.equals(map.get("redirect"))));
         } else if (injectOnLine) {
             builder.setInjectorFactory(new HookInjectorFactory.LineNumber(line));
         } else if (injectOnExit) builder.setInjectorFactory(AsmHook.ON_EXIT_FACTORY);

@@ -82,6 +82,8 @@ public class MyceliumCoreMod extends HookLoader {
         Configuration cfg = new Configuration(new File(Launch.minecraftHome, "config/mycelium.cfg"));
         if (cfg.getBoolean("creativeNoclip", "general", true, "Noclip in creative mode when fly."))
             registerHookContainer("cn.tesseract.mycelium.hook.CreativeHook");
+        if (cfg.getBoolean("fastLang", "general", true, "Speed up language reload."))
+            registerHookContainer("cn.tesseract.mycelium.hook.FastLangHook");
         if (!LuaHookLib.luaEventList.isEmpty())
             registerHookContainer("cn.tesseract.mycelium.hook.ForgeEventHook");
     }

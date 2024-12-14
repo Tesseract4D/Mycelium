@@ -106,24 +106,34 @@ public abstract class HookInjectorMethodVisitor extends AdviceAdapter {
 
     public static class Invoke extends HookInjectorMethodVisitor {
         private final String method;
-        private int n;
-        private final boolean m;
+        private int index;
+        private final boolean after;
+        private final boolean redirect;
 
         public Invoke(MethodVisitor mv, int access, String name, String desc,
-                      AsmHook hook, HookInjectorClassVisitor cv, String method, int n, boolean injectOnExit) {
+                      AsmHook hook, HookInjectorClassVisitor cv, String method, int index, boolean after, boolean redirect) {
             super(mv, access, name, desc, hook, cv);
             this.method = method;
-            this.n = n;
-            this.m = injectOnExit;
+            this.index = index;
+            this.after = after;
+            this.redirect = redirect;
         }
 
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-            if (m) super.visitMethodInsn(opcode, owner, name, desc, itf);
+            boolean isTarget = false;
             if (method.equals("L" + owner + ";" + HookLibPlugin.getMethodMcpName(name) + desc))
-                if (n != -1 && (n == -2 || n-- == 0))
-                    visitHook();
-            if (!m) super.visitMethodInsn(opcode, owner, name, desc, itf);
+                if (index != -1 && (index == -2 || index-- == 0)) {
+                    isTarget = true;
+                }
+            boolean flag = !(isTarget && redirect);
+            if (after && flag) super.visitMethodInsn(opcode, owner, name, desc, itf);
+            if (isTarget) {
+                if (!flag)
+                    visitInsn(Opcodes.POP);
+                visitHook();
+            }
+            if (!after && flag) super.visitMethodInsn(opcode, owner, name, desc, itf);
         }
     }
 }

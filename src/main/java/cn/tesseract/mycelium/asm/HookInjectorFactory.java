@@ -67,20 +67,22 @@ public abstract class HookInjectorFactory {
 
     public static class Invoke extends HookInjectorFactory {
 
-        private String method;
-        private int n;
-        private boolean onExit;
+        private final String method;
+        private final int index;
+        private final boolean after;
+        private final boolean redirect;
 
-        public Invoke(String method, int n, boolean onExit) {
+        public Invoke(String method, int index, boolean after, boolean redirect) {
             this.method = method;
-            this.n = n;
-            this.onExit = onExit;
+            this.index = index;
+            this.after = after;
+            this.redirect = redirect;
         }
 
         @Override
         public HookInjectorMethodVisitor createHookInjector(MethodVisitor mv, int access, String name, String desc,
                                                             AsmHook hook, HookInjectorClassVisitor cv) {
-            return new HookInjectorMethodVisitor.Invoke(mv, access, name, desc, hook, cv, method, n, onExit);
+            return new HookInjectorMethodVisitor.Invoke(mv, access, name, desc, hook, cv, method, index, after, redirect);
         }
     }
 }
