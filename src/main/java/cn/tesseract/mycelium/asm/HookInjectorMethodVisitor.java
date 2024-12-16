@@ -108,15 +108,13 @@ public abstract class HookInjectorMethodVisitor extends AdviceAdapter {
         private final String method;
         private int index;
         private final boolean after;
-        private final boolean redirect;
 
         public Invoke(MethodVisitor mv, int access, String name, String desc,
-                      AsmHook hook, HookInjectorClassVisitor cv, String method, int index, boolean after, boolean redirect) {
+                      AsmHook hook, HookInjectorClassVisitor cv, String method, int index, boolean after) {
             super(mv, access, name, desc, hook, cv);
             this.method = method;
             this.index = index;
             this.after = after;
-            this.redirect = redirect;
         }
 
         @Override
@@ -126,14 +124,11 @@ public abstract class HookInjectorMethodVisitor extends AdviceAdapter {
                 if (index != -1 && (index == -2 || index-- == 0)) {
                     isTarget = true;
                 }
-            boolean flag = !(isTarget && redirect);
-            if (after && flag) super.visitMethodInsn(opcode, owner, name, desc, itf);
+            if (after) super.visitMethodInsn(opcode, owner, name, desc, itf);
             if (isTarget) {
-                if (!flag)
-                    visitInsn(Opcodes.POP);
                 visitHook();
             }
-            if (!after && flag) super.visitMethodInsn(opcode, owner, name, desc, itf);
+            if (!after) super.visitMethodInsn(opcode, owner, name, desc, itf);
         }
     }
 }

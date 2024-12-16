@@ -1,5 +1,6 @@
 package cn.tesseract.mycelium.lua;
 
+import cn.tesseract.mycelium.MyceliumCoreMod;
 import cn.tesseract.mycelium.asm.AsmHook;
 import org.objectweb.asm.*;
 
@@ -12,8 +13,10 @@ public class LuaHookVisitor {
     private static final ArrayList<String> methods = new ArrayList<>();
 
     public static byte[] visit() {
+        if (!MyceliumCoreMod.phase.equals("hook"))
+            throw new IllegalStateException();
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, LuaHookLib.luaHookClass.replace('.', '/'), null, "java/lang/Object", null);
+        cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, LuaHookTransformer.luaHookClass.replace('.', '/'), null, "java/lang/Object", null);
 
         MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
         mv.visitCode();

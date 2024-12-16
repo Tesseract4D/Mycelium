@@ -1,7 +1,5 @@
 package cn.tesseract.mycelium.lua;
 
-import cn.tesseract.mycelium.MyceliumCoreMod;
-import org.luaj.vm2.LuaInteger;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;

@@ -117,7 +117,7 @@ public class HookContainerParser {
         }
 
         if (annotationValues.containsKey("injectOnInvoke")) {
-            builder.setInjectorFactory(new HookInjectorFactory.Invoke((String) annotationValues.get("injectOnInvoke"), annotationValues.containsKey("injectOnLine") ? line : -2, injectOnExit, Boolean.TRUE.equals(annotationValues.get("redirect"))));
+            builder.setInjectorFactory(new HookInjectorFactory.Invoke((String) annotationValues.get("injectOnInvoke"), annotationValues.containsKey("injectOnLine") ? line : -2, injectOnExit));
         } else if (injectOnLine) {
             builder.setInjectorFactory(new HookInjectorFactory.LineNumber(line));
         } else if (injectOnExit) builder.setInjectorFactory(AsmHook.ON_EXIT_FACTORY);

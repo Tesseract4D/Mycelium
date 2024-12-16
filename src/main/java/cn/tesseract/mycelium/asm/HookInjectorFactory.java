@@ -70,19 +70,17 @@ public abstract class HookInjectorFactory {
         private final String method;
         private final int index;
         private final boolean after;
-        private final boolean redirect;
 
-        public Invoke(String method, int index, boolean after, boolean redirect) {
+        public Invoke(String method, int index, boolean after) {
             this.method = method;
             this.index = index;
             this.after = after;
-            this.redirect = redirect;
         }
 
         @Override
         public HookInjectorMethodVisitor createHookInjector(MethodVisitor mv, int access, String name, String desc,
                                                             AsmHook hook, HookInjectorClassVisitor cv) {
-            return new HookInjectorMethodVisitor.Invoke(mv, access, name, desc, hook, cv, method, index, after, redirect);
+            return new HookInjectorMethodVisitor.Invoke(mv, access, name, desc, hook, cv, method, index, after);
         }
     }
 }

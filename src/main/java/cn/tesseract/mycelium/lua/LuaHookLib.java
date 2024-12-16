@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LuaHookLib {
-    public static String luaHookClass = "cn.tesseract.mycelium.lua.LuaJavaHook";
     public static int hookIndex = 0;
     public static final Map<String, ArrayList<LuaValue>> luaEventList = new HashMap<>();
 
@@ -79,7 +78,7 @@ public class LuaHookLib {
 
         builder.setTargetMethodReturnType(targetReturnType);
 
-        builder.setHookClass(luaHookClass);
+        builder.setHookClass(LuaHookTransformer.luaHookClass);
         builder.setHookMethod(hookMethod + hookIndex);
         builder.addThisToHookMethodParameters();
 
@@ -108,7 +107,7 @@ public class LuaHookLib {
         }
 
         if (map.containsKey("injectOnInvoke")) {
-            builder.setInjectorFactory(new HookInjectorFactory.Invoke((String) map.get("injectOnInvoke"), map.containsKey("injectOnLine") ? line : -2, injectOnExit, Boolean.TRUE.equals(map.get("redirect"))));
+            builder.setInjectorFactory(new HookInjectorFactory.Invoke((String) map.get("injectOnInvoke"), map.containsKey("injectOnLine") ? line : -2, injectOnExit));
         } else if (injectOnLine) {
             builder.setInjectorFactory(new HookInjectorFactory.LineNumber(line));
         } else if (injectOnExit) builder.setInjectorFactory(AsmHook.ON_EXIT_FACTORY);
@@ -210,7 +209,7 @@ public class LuaHookLib {
         };
     }
 
-    public static void dumpClassFile(byte[] bytes) {
+    public static File dumpClassFile(byte[] bytes) {
         final String[] className = new String[1];
         ClassReader cr = new ClassReader(bytes);
         ClassVisitor cw = new ClassVisitor(Opcodes.ASM5, new ClassWriter(cr, 0)) {
@@ -228,5 +227,6 @@ public class LuaHookLib {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return file;
     }
 }

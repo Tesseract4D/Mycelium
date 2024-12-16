@@ -3,7 +3,7 @@ package cn.tesseract.mycelium;
 import cn.tesseract.mycelium.asm.minecraft.HookLoader;
 import cn.tesseract.mycelium.asm.minecraft.PrimaryClassTransformer;
 import cn.tesseract.mycelium.lua.LuaHookLib;
-import cn.tesseract.mycelium.lua.LuaHookVisitor;
+import cn.tesseract.mycelium.lua.LuaHookTransformer;
 import cn.tesseract.mycelium.lua.LuaLogger;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
@@ -17,24 +17,18 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.security.CodeSource;
-import java.security.SecureClassLoader;
 
 public class MyceliumCoreMod extends HookLoader {
     public static Globals globals;
-    public static Method defineClass;
+    public static Field cachedClasses;
     public static String phase = "coremod";
     public static File scriptDir;
 
     static {
         try {
-            Field f = LaunchClassLoader.class.getDeclaredField("cachedClasses");
-            f.setAccessible(true);
-            defineClass = SecureClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class, CodeSource.class);
-            defineClass.setAccessible(true);
-        } catch (NoSuchFieldException | NoSuchMethodException e) {
+            cachedClasses = LaunchClassLoader.class.getDeclaredField("cachedClasses");
+            cachedClasses.setAccessible(true);
+        } catch (NoSuchFieldException e) {
             throw new RuntimeException(e);
         }
         scriptDir = new File(Launch.minecraftHome, "lua");
@@ -52,7 +46,7 @@ public class MyceliumCoreMod extends HookLoader {
 
     @Override
     public String[] getASMTransformerClass() {
-        return new String[]{PrimaryClassTransformer.class.getName()};
+        return new String[]{LuaHookTransformer.class.getName(), PrimaryClassTransformer.class.getName()};
     }
 
     @Override
@@ -62,6 +56,7 @@ public class MyceliumCoreMod extends HookLoader {
 
     @Override
     protected void registerHooks() {
+        phase = "hook";
         try {
             File[] files = scriptDir.listFiles();
             if (files != null)
@@ -71,11 +66,8 @@ public class MyceliumCoreMod extends HookLoader {
                         chunk.call();
                     }
                 }
-
-            byte[] data = LuaHookVisitor.visit();
-            //LuaHookLib.dumpClassFile(data);
-            defineClass.invoke(Launch.classLoader, LuaHookLib.luaHookClass, data, 0, data.length, null);
-        } catch (IllegalAccessException | InvocationTargetException | IOException e) {
+            Class.forName(LuaHookTransformer.luaHookClass);
+        } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
@@ -84,6 +76,8 @@ public class MyceliumCoreMod extends HookLoader {
             registerHookContainer("cn.tesseract.mycelium.hook.CreativeHook");
         if (cfg.getBoolean("fastLang", "general", true, "Speed up language reload."))
             registerHookContainer("cn.tesseract.mycelium.hook.FastLangHook");
+        if (cfg.hasChanged())
+            cfg.save();
         if (!LuaHookLib.luaEventList.isEmpty())
             registerHookContainer("cn.tesseract.mycelium.hook.ForgeEventHook");
     }
