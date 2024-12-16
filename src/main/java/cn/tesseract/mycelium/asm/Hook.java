@@ -22,8 +22,6 @@ public @interface Hook {
 
     boolean injectOnExit() default false;
 
-    boolean redirect() default false;
-
     int injectOnLine() default -1;
 
     String injectOnInvoke() default "";

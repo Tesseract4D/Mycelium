@@ -1,5 +1,7 @@
 package cn.tesseract.mycelium;
 
+import cn.tesseract.mycelium.asm.NodeTransformer;
+import cn.tesseract.mycelium.asm.minecraft.HookLibPlugin;
 import cn.tesseract.mycelium.asm.minecraft.HookLoader;
 import cn.tesseract.mycelium.asm.minecraft.PrimaryClassTransformer;
 import cn.tesseract.mycelium.lua.LuaHookLib;
@@ -12,6 +14,10 @@ import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 import org.luaj.vm2.lib.jse.JsePlatform;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
 
 import java.io.File;
 import java.io.FileReader;
@@ -74,8 +80,23 @@ public class MyceliumCoreMod extends HookLoader {
         Configuration cfg = new Configuration(new File(Launch.minecraftHome, "config/mycelium.cfg"));
         if (cfg.getBoolean("creativeNoclip", "general", true, "Noclip in creative mode when fly."))
             registerHookContainer("cn.tesseract.mycelium.hook.CreativeHook");
-        if (cfg.getBoolean("fastLang", "general", true, "Speed up language reload."))
+        if (cfg.getBoolean("fastLang", "general", true, "Speed up language reload.")) {
             registerHookContainer("cn.tesseract.mycelium.hook.FastLangHook");
+            registerNodeTransformer("net.minecraft.client.gui.GuiLanguage$List", new NodeTransformer() {
+                @Override
+                public void transform(ClassNode node) {
+                    for (MethodNode method : node.methods) {
+                        if (HookLibPlugin.getMethodMcpName(method.name).equals("elementClicked"))
+                            for (int i = 0; i < method.instructions.size(); i++) {
+                                AbstractInsnNode insn = method.instructions.get(i);
+                                if (insn instanceof MethodInsnNode minsn)
+                                    if (HookLibPlugin.getMethodMcpName(minsn.name).equals("refreshResources"))
+                                        minsn.name = "reloadLanguage";
+                            }
+                    }
+                }
+            });
+        }
         if (cfg.hasChanged())
             cfg.save();
         if (!LuaHookLib.luaEventList.isEmpty())

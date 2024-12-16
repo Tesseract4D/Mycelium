@@ -3,9 +3,16 @@ package cn.tesseract.mycelium.asm.minecraft;
 import cn.tesseract.mycelium.asm.AsmHook;
 import cn.tesseract.mycelium.asm.ClassMetadataReader;
 import cn.tesseract.mycelium.asm.HookClassTransformer;
+import cn.tesseract.mycelium.asm.NodeTransformer;
 import cpw.mods.fml.common.asm.transformers.DeobfuscationTransformer;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,11 +48,16 @@ public abstract class HookLoader implements IFMLLoadingPlugin {
         getTransformer().registerHookContainer(className);
     }
 
+    public static void registerNodeTransformer(String className, NodeTransformer transformer) {
+        List<NodeTransformer> list = MinecraftClassTransformer.transformerMap.computeIfAbsent(className, k -> new ArrayList<>());
+        list.add(transformer);
+    }
+
     public static ClassMetadataReader getDeobfuscationMetadataReader() {
         return deobfuscationMetadataReader;
     }
 
-	static DeobfuscationTransformer getDeobfuscationTransformer() {
+    static DeobfuscationTransformer getDeobfuscationTransformer() {
         if (HookLibPlugin.getObfuscated() && deobfuscationTransformer == null) {
             deobfuscationTransformer = new DeobfuscationTransformer();
         }

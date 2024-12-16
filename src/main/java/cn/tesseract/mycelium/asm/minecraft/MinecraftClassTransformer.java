@@ -3,10 +3,14 @@ package cn.tesseract.mycelium.asm.minecraft;
 import cn.tesseract.mycelium.asm.AsmHook;
 import cn.tesseract.mycelium.asm.HookClassTransformer;
 import cn.tesseract.mycelium.asm.HookInjectorClassVisitor;
+import cn.tesseract.mycelium.asm.NodeTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.tree.ClassNode;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -16,7 +20,8 @@ import java.util.List;
 public class MinecraftClassTransformer extends HookClassTransformer implements IClassTransformer {
 
     public static MinecraftClassTransformer instance;
-    private static List<IClassTransformer> postTransformers = new ArrayList<IClassTransformer>();
+    private static final List<IClassTransformer> postTransformers = new ArrayList<IClassTransformer>();
+    public static final HashMap<String, List<NodeTransformer>> transformerMap = new HashMap<>();
 
     public MinecraftClassTransformer() {
         instance = this;
@@ -34,6 +39,19 @@ public class MinecraftClassTransformer extends HookClassTransformer implements I
         for (int i = 0; i < postTransformers.size(); i++) {
             bytecode = postTransformers.get(i).transform(oldName, newName, bytecode);
         }
+
+        List<NodeTransformer> transformers = transformerMap.get(newName);
+        if (transformers != null) {
+            ClassNode classNode = new ClassNode();
+            ClassReader classReader = new ClassReader(bytecode);
+            classReader.accept(classNode, 0);
+            for (NodeTransformer transformer : transformers)
+                transformer.transform(classNode);
+            ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+            classNode.accept(classWriter);
+            bytecode = classWriter.toByteArray();
+        }
+
         return bytecode;
     }
 
