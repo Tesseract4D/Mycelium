@@ -15,7 +15,7 @@ public class HookClassTransformer implements ClassFileTransformer {
 
     public HookLogger logger = new HookLogger.SystemOutLogger();
     public HashMap<String, List<AsmHook>> hooksMap = new HashMap<>();
-    private HookContainerParser containerParser = new HookContainerParser(this);
+    private final HookContainerParser containerParser = new HookContainerParser(this);
     protected ClassMetadataReader classMetadataReader = new ClassMetadataReader();
 
     public void registerHook(AsmHook hook) {

@@ -14,6 +14,7 @@ import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import org.luaj.vm2.LuaValue;
+import org.lwjgl.opengl.Display;
 
 import java.util.Collections;
 
@@ -47,7 +48,6 @@ public class Mycelium {
 
         e.getModMetadata().description = "A library mod used for multiple things including easy ASM fixes and more.";
 
-        LuaValue func = MyceliumCoreMod.getLuaGlobals().get("preInit");
         LuaHookLib.callLuaEvent(e);
     }
 
