@@ -11,6 +11,7 @@ import org.objectweb.asm.tree.ClassNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -29,6 +30,7 @@ public class MinecraftClassTransformer extends HookClassTransformer implements I
         this.classMetadataReader = HookLoader.getDeobfuscationMetadataReader();
 
         this.hooksMap.putAll(PrimaryClassTransformer.instance.getHooksMap());
+
         PrimaryClassTransformer.instance.getHooksMap().clear();
         PrimaryClassTransformer.instance.registeredSecondTransformer = true;
     }
@@ -41,14 +43,22 @@ public class MinecraftClassTransformer extends HookClassTransformer implements I
         }
 
         List<NodeTransformer> transformers = transformerMap.get(newName);
+
         if (transformers != null) {
             ClassNode classNode = new ClassNode();
             ClassReader classReader = new ClassReader(bytecode);
+
             classReader.accept(classNode, 0);
-            for (NodeTransformer transformer : transformers)
-                transformer.transform(classNode);
+
+            Iterator<NodeTransformer> it = transformers.iterator();
+            while (it.hasNext()) {
+                it.next().transform(classNode);
+                it.remove();
+            }
+
             ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
             classNode.accept(classWriter);
+
             bytecode = classWriter.toByteArray();
         }
 
