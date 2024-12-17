@@ -9,10 +9,6 @@ import java.io.IOException;
 public abstract class Config {
     public static final String configDir = "config" + File.separator;
 
-    static {
-        new File(Launch.minecraftHome, configDir).mkdirs();
-    }
-
     public final File file;
     public final String defaultConfig;
 
