@@ -8,7 +8,7 @@ import net.minecraft.util.MovingObjectPosition;
 public class CreativeHook {
     @Hook
     public static void onUpdate(EntityPlayer c) {
-        c.noClip = c.capabilities.isFlying;
+        c.noClip = c.capabilities.isFlying && c.capabilities.isCreativeMode;
     }
 
     @Hook
