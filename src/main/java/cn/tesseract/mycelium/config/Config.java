@@ -7,28 +7,24 @@ import java.io.File;
 import java.io.IOException;
 
 public abstract class Config {
-    public static final String configDir = "config" + File.separator;
-
-    static {
-        new File(Launch.minecraftHome, configDir).mkdirs();
-    }
+    public static final File configDir = new File(Launch.minecraftHome, "config");
 
     public final File file;
     public String defaultConfig;
-
-    public Config(String file, String defaultConfig) {
-        this.file = new File(Launch.minecraftHome, configDir + file);
-        this.defaultConfig = defaultConfig;
-    }
 
     public Config(File file, String defaultConfig) {
         this.file = file;
         this.defaultConfig = defaultConfig;
     }
 
-    public abstract Config read();
+    public Config(String file, String defaultConfig) {
+        this.file = new File(configDir, file);
+        this.defaultConfig = defaultConfig;
+    }
 
-    public abstract Config save(String config);
+    public abstract void read();
+
+    public abstract void save(String config);
 
     public String readFile() {
         if (file.exists())
