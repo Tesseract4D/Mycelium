@@ -1,0 +1,25 @@
+{
+  "modListVersion": 2,
+  "modList": [
+    {
+      "modid": "${modId}",
+      "name": "${modName}",
+      "description": "A library mod used for multiple things including easy ASM hooks and more.",
+      "version": "${modVersion}",
+      "mcversion": "${minecraftVersion}",
+      "url": "https://github.com/tesseract4d",
+      "updateUrl": "",
+      "authorList": [
+        "Tesseract"
+      ],
+      "credits": "Gloomy Folken for creating HookLib",
+      "logoFile": "",
+      "screenshots": [],
+      "parent": "",
+      "requiredMods": [],
+      "dependencies": [],
+      "dependants": [],
+      "useDependencyInformation": false
+    }
+  ]
+}

@@ -1,10 +1,28 @@
 package cn.tesseract.mycelium.config;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
-public interface IConfigProperties {
-    default void load(Field f, Class<?> c, String n, String v) {
+public abstract class ConfigProperties extends Config {
+    public ConfigProperties(File file) {
+        super(file, "");
+    }
+
+    public ConfigProperties(String file) {
+        super(file + ".properties", "");
+    }
+
+    public void read() {
+        loadProperties(readFile());
+        save(toProperties());
+    }
+
+    public void save(String s) {
+        saveFile(s);
+    }
+
+    public void load(Field f, Class<?> c, String n, String v) {
         try {
             if (c == byte.class)
                 f.set(this, Byte.valueOf(v));
@@ -29,7 +47,7 @@ public interface IConfigProperties {
         }
     }
 
-    default void loadProperties(String ct) {
+    public void loadProperties(String ct) {
         Field[] fields = this.getClass().getDeclaredFields();
         HashMap<String, Field> map = new HashMap<>();
         for (Field field : fields)
@@ -48,20 +66,21 @@ public interface IConfigProperties {
         }
     }
 
-    default String toProperties() {
+    public String toProperties() {
         Field[] fields = this.getClass().getDeclaredFields();
         StringBuilder ct = new StringBuilder();
-        try {
-            for (Field field : fields) {
+        for (Field field : fields) {
+            try {
                 if (ct.length() != 0)
                     ct.append("\n");
                 if (field.isAnnotationPresent(Comment.class))
                     ct.append("#").append(field.getAnnotation(Comment.class).value()).append("\n");
                 ct.append(field.getName()).append("=").append(field.get(this));
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
             }
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
         }
+
         return ct.toString();
     }
 }

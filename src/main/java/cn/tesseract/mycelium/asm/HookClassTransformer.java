@@ -1,5 +1,6 @@
 package cn.tesseract.mycelium.asm;
 
+import cn.tesseract.mycelium.MyceliumCoreMod;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
@@ -44,12 +45,6 @@ public class HookClassTransformer implements ClassFileTransformer {
             Collections.sort(hooks);
             logger.debug("Injecting hooks into class " + className);
             try {
-                /*
-                 Начиная с седьмой версии джавы, сильно изменился процесс верификации байткода.
-                 Ради этого приходится включать автоматическую генерацию stack map frame'ов.
-                 На более старых версиях байткода это лишняя трата времени.
-                 Подробнее здесь: http://stackoverflow.com/questions/25109942
-                */
                 int majorVersion = ((bytecode[6] & 0xFF) << 8) | (bytecode[7] & 0xFF);
                 boolean java7 = majorVersion > 50;
 
@@ -59,6 +54,10 @@ public class HookClassTransformer implements ClassFileTransformer {
                 HookInjectorClassVisitor hooksWriter = createInjectorClassVisitor(cw, hooks);
                 cr.accept(hooksWriter, java7 ? ClassReader.SKIP_FRAMES : ClassReader.EXPAND_FRAMES);
                 bytecode = cw.toByteArray();
+
+                if (MyceliumCoreMod.dumpTransformedClass)
+                    MyceliumCoreMod.dumpClassFile(bytecode);
+
                 for (AsmHook hook : hooksWriter.injectedHooks) {
                     if (hook.injected)
                         logger.debug("Patching method " + hook.getPatchedMethodName());

@@ -30,7 +30,13 @@ public class LuaHookVisitor {
             injectMethod(cw, methods.get(i), methods.get(i + 1), i / 2);
 
         cw.visitEnd();
-        return cw.toByteArray();
+
+        byte[] bytecode = cw.toByteArray();
+
+        if (MyceliumCoreMod.dumpTransformedClass)
+            MyceliumCoreMod.dumpClassFile(bytecode);
+
+        return bytecode;
     }
 
     public static void createMethod(String name, String desc) {
