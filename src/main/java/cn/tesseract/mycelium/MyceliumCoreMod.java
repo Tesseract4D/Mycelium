@@ -11,11 +11,15 @@ import cn.tesseract.mycelium.lua.LuaHookLib;
 import cn.tesseract.mycelium.lua.LuaHookTransformer;
 import cn.tesseract.mycelium.lua.LuaLogger;
 import net.minecraft.launchwrapper.Launch;
-import net.minecraft.launchwrapper.LaunchClassLoader;
+import org.apache.commons.io.FileUtils;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 import org.luaj.vm2.lib.jse.JsePlatform;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -23,23 +27,16 @@ import org.objectweb.asm.tree.MethodNode;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Field;
 
 public class MyceliumCoreMod extends HookLoader {
     public static Globals globals;
-    public static Field cachedClasses;
     public static String phase = "coremod";
     public static File scriptDir;
     public static MyceliumConfig config = new MyceliumConfig();
+    public static boolean dumpTransformedClass = false;
 
     static {
         config.read();
-        try {
-            cachedClasses = LaunchClassLoader.class.getDeclaredField("cachedClasses");
-            cachedClasses.setAccessible(true);
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
-        }
         scriptDir = new File(Launch.minecraftHome, "lua");
         scriptDir.mkdir();
     }
@@ -100,5 +97,26 @@ public class MyceliumCoreMod extends HookLoader {
         }
         if (!LuaHookLib.luaEventList.isEmpty())
             registerHookContainer(ForgeEventHook.class.getName());
+    }
+
+    public static File dumpClassFile(byte[] bytes) {
+        final String[] className = new String[1];
+        ClassReader cr = new ClassReader(bytes);
+        ClassVisitor cw = new ClassVisitor(Opcodes.ASM5, new ClassWriter(cr, 0)) {
+            @Override
+            public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+                className[0] = name;
+                super.visit(version, access, name, signature, superName, interfaces);
+            }
+        };
+        cr.accept(cw, 0);
+        String name = className[0].substring(className[0].lastIndexOf('/') + 1);
+        File file = new File(System.getProperty("user.dir") + File.separator + name + ".class");
+        try {
+            FileUtils.writeByteArrayToFile(file, bytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return file;
     }
 }

@@ -1,5 +1,6 @@
 package cn.tesseract.mycelium.asm.minecraft;
 
+import cn.tesseract.mycelium.MyceliumCoreMod;
 import cn.tesseract.mycelium.asm.AsmHook;
 import cn.tesseract.mycelium.asm.HookClassTransformer;
 import cn.tesseract.mycelium.asm.HookInjectorClassVisitor;
@@ -60,6 +61,8 @@ public class MinecraftClassTransformer extends HookClassTransformer implements I
             classNode.accept(classWriter);
 
             bytecode = classWriter.toByteArray();
+            if (MyceliumCoreMod.dumpTransformedClass)
+                MyceliumCoreMod.dumpClassFile(bytecode);
         }
 
         return bytecode;
