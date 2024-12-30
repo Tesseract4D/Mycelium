@@ -3,18 +3,19 @@ package cn.tesseract.mycelium.asm;
 import cn.tesseract.mycelium.MyceliumCoreMod;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.tree.ClassNode;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 public class HookClassTransformer implements ClassFileTransformer {
 
     public HookLogger logger = new HookLogger.SystemOutLogger();
     public HashMap<String, List<AsmHook>> hooksMap = new HashMap<>();
-    public HashMap<String, List<NodeTransformer>> transformerMap = new HashMap<>();
     private final HookContainerParser containerParser = new HookContainerParser(this);
     protected ClassMetadataReader classMetadataReader = new ClassMetadataReader();
 
@@ -30,16 +31,6 @@ public class HookClassTransformer implements ClassFileTransformer {
 
     public void registerHookContainer(String className) {
         containerParser.parseHooks(className);
-    }
-
-    public void registerNodeTransformer(String className, NodeTransformer transformer) {
-        if (transformerMap.containsKey(className)) {
-            transformerMap.get(className).add(transformer);
-        } else {
-            List<NodeTransformer> list = new ArrayList<>(2);
-            list.add(transformer);
-            transformerMap.put(className, list);
-        }
     }
 
     @Override
@@ -91,25 +82,6 @@ public class HookClassTransformer implements ClassFileTransformer {
                 }
             }
         }
-
-        List<NodeTransformer> transformers = transformerMap.get(className);
-
-        if (transformers != null) {
-            ClassNode classNode = new ClassNode();
-            ClassReader classReader = new ClassReader(bytecode);
-
-            classReader.accept(classNode, 0);
-
-            Iterator<NodeTransformer> it = transformers.iterator();
-            while (it.hasNext()) {
-                it.next().transform(classNode);
-            }
-
-            ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-            classNode.accept(classWriter);
-            bytecode = classWriter.toByteArray();
-        }
-
         return bytecode;
     }
 

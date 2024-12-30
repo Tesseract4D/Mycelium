@@ -45,7 +45,8 @@ public abstract class HookLoader implements IFMLLoadingPlugin {
     }
 
     public static void registerNodeTransformer(String className, NodeTransformer transformer) {
-        getTransformer().registerNodeTransformer(className, transformer);
+        List<NodeTransformer> list = MinecraftClassTransformer.transformerMap.computeIfAbsent(className, k -> new ArrayList<>());
+        list.add(transformer);
     }
 
     public static ClassMetadataReader getDeobfuscationMetadataReader() {
