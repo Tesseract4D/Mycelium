@@ -8,6 +8,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
+import net.minecraftforge.common.MinecraftForge;
 
 @Mod(modid = Mycelium.MODID, useMetadata = true, name = Mycelium.NAME, version = Tags.VERSION)
 public class Mycelium {
@@ -22,6 +23,7 @@ public class Mycelium {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent e) {
+        MinecraftForge.EVENT_BUS.register(this);
         MyceliumCoreMod.phase = "preInit";
         LuaHookLib.callLuaEvent(e);
     }
