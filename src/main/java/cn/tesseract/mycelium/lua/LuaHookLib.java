@@ -208,25 +208,4 @@ public class LuaHookLib {
             default -> Object.class;
         };
     }
-
-    public static File dumpClassFile(byte[] bytes) {
-        final String[] className = new String[1];
-        ClassReader cr = new ClassReader(bytes);
-        ClassVisitor cw = new ClassVisitor(Opcodes.ASM5, new ClassWriter(cr, 0)) {
-            @Override
-            public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-                className[0] = name;
-                super.visit(version, access, name, signature, superName, interfaces);
-            }
-        };
-        cr.accept(cw, 0);
-        String name = className[0].substring(className[0].lastIndexOf('/') + 1);
-        File file = new File(System.getProperty("user.dir") + File.separator + name + ".class");
-        try {
-            FileUtils.writeByteArrayToFile(file, bytes);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return file;
-    }
 }
