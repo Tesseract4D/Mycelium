@@ -1,14 +1,15 @@
 package cn.tesseract.mycelium.hook;
 
+import cn.tesseract.mycelium.MyceliumCoreMod;
 import cn.tesseract.mycelium.asm.Hook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MovingObjectPosition;
 
-public class CreativeHook {
-    @Hook
+public class NoclipHook {
+    @Hook(injectOnExit = true)
     public static void onUpdate(EntityPlayer c) {
-        c.noClip = c.capabilities.isFlying && c.capabilities.isCreativeMode;
+        c.noClip = c.capabilities.isFlying && (MyceliumCoreMod.config.survivalNoclip || c.capabilities.isCreativeMode);
     }
 
     @Hook

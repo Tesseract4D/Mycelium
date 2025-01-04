@@ -4,7 +4,7 @@ import cn.tesseract.mycelium.asm.minecraft.HookLibPlugin;
 import cn.tesseract.mycelium.asm.minecraft.HookLoader;
 import cn.tesseract.mycelium.asm.minecraft.PrimaryClassTransformer;
 import cn.tesseract.mycelium.hook.BlackBlockHook;
-import cn.tesseract.mycelium.hook.CreativeHook;
+import cn.tesseract.mycelium.hook.NoclipHook;
 import cn.tesseract.mycelium.hook.FastLangHook;
 import cn.tesseract.mycelium.hook.ForgeEventHook;
 import cn.tesseract.mycelium.lua.LuaHookLib;
@@ -78,7 +78,7 @@ public class MyceliumCoreMod extends HookLoader {
         }
 
         if (config.creativeNoclip)
-            registerHookContainer(CreativeHook.class.getName());
+            registerHookContainer(NoclipHook.class.getName());
         if (config.effectBlackBlockFix)
             registerHookContainer(BlackBlockHook.class.getName());
         if (config.fastLang) {
