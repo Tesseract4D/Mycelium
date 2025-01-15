@@ -11,10 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Удобная базовая реализация IFMLLoadingPlugin для использования HookLib.
- * Регистрировать хуки и контейнеры нужно в registerHooks().
- */
 public abstract class HookLoader implements IFMLLoadingPlugin {
 
     private static DeobfuscationTransformer deobfuscationTransformer;
@@ -30,16 +26,10 @@ public abstract class HookLoader implements IFMLLoadingPlugin {
                 MinecraftClassTransformer.instance : PrimaryClassTransformer.instance;
     }
 
-    /**
-     * Регистрирует вручную созданный хук
-     */
     public static void registerHook(AsmHook hook) {
         getTransformer().registerHook(hook);
     }
 
-    /**
-     * Деобфусцирует класс с хуками и регистрирует хуки из него
-     */
     public static void registerHookContainer(String className) {
         getTransformer().registerHookContainer(className);
     }

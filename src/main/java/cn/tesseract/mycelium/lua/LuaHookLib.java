@@ -2,14 +2,11 @@ package cn.tesseract.mycelium.lua;
 
 import cn.tesseract.mycelium.MyceliumCoreMod;
 import cn.tesseract.mycelium.asm.*;
-import org.apache.commons.io.FileUtils;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 import org.objectweb.asm.*;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -173,12 +170,12 @@ public class LuaHookLib {
             builder.setMandatory(Boolean.TRUE.equals(map.get("isMandatory")));
         }
 
-        LuaHookVisitor.createMethod(hookMethod + hookIndex++, hookDesc.toString() + methodType.getDescriptor());
+        LuaHookClassVisitor.createMethod(hookMethod + hookIndex++, hookDesc.toString() + methodType.getDescriptor());
 
         if (map.containsKey("returnAnotherMethod")) {
             LuaBridge.newLuaHook(new LuaHook(name, (LuaValue) map.get("returnAnotherMethod"), typeToClass(targetReturnType)), hookIndex);
             String n = hookMethod + hookIndex++;
-            LuaHookVisitor.createMethod(n, hookDesc.toString() + targetReturnType.getDescriptor());
+            LuaHookClassVisitor.createMethod(n, hookDesc.toString() + targetReturnType.getDescriptor());
         }
 
         MyceliumCoreMod.getTransformer().registerHook(builder.build());

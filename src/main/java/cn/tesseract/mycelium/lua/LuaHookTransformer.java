@@ -8,7 +8,7 @@ public class LuaHookTransformer implements IClassTransformer {
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
         if (name.equals(luaHookClass))
-            return LuaHookVisitor.visit();
+            return LuaHookClassVisitor.visit();
         return basicClass;
     }
 }

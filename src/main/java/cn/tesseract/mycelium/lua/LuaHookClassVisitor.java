@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import static org.objectweb.asm.Opcodes.*;
 import static org.objectweb.asm.Type.*;
 
-public class LuaHookVisitor {
+public class LuaHookClassVisitor {
     private static final ArrayList<String> methods = new ArrayList<>();
 
     public static byte[] visit() {
