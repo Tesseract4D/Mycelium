@@ -14,8 +14,8 @@ public abstract class ConfigJSON<T> extends Config {
         this.clazz = clazz;
     }
 
-    public ConfigJSON(String file, Class<T> clazz) {
-        super(file + ".json");
+    public ConfigJSON(String name, Class<T> clazz) {
+        super(name + ".json");
         this.clazz = clazz;
     }
 

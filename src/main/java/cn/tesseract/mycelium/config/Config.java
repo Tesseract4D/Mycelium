@@ -15,8 +15,8 @@ public abstract class Config {
         this.file = file;
     }
 
-    public Config(String file) {
-        this.file = new File(configDir, file);
+    public Config(String name) {
+        this.file = new File(configDir, name);
     }
 
     public abstract void read();

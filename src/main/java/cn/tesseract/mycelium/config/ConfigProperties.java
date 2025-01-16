@@ -11,8 +11,8 @@ public abstract class ConfigProperties extends Config {
         super(file);
     }
 
-    public ConfigProperties(String file) {
-        super(file + ".properties");
+    public ConfigProperties(String name) {
+        super(name + ".properties");
     }
 
     public void read() {
