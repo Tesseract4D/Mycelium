@@ -10,16 +10,13 @@ public abstract class Config {
     public static final File configDir = new File(Launch.minecraftHome, "config");
 
     public final File file;
-    public String defaultConfig;
 
-    public Config(File file, String defaultConfig) {
+    public Config(File file) {
         this.file = file;
-        this.defaultConfig = defaultConfig;
     }
 
-    public Config(String file, String defaultConfig) {
+    public Config(String file) {
         this.file = new File(configDir, file);
-        this.defaultConfig = defaultConfig;
     }
 
     public abstract void read();
@@ -35,7 +32,7 @@ public abstract class Config {
         else {
             resetFile();
         }
-        return defaultConfig;
+        return "";
     }
 
     public void saveFile(String config) {
@@ -48,14 +45,12 @@ public abstract class Config {
         }
     }
 
-    public Config resetFile() {
+    public void resetFile() {
         try {
-            if (!file.exists())
-                file.createNewFile();
-            FileUtils.writeStringToFile(file, defaultConfig);
+            file.delete();
+            file.createNewFile();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return this;
     }
 }
