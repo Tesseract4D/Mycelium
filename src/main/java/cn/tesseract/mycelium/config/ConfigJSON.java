@@ -25,7 +25,7 @@ public abstract class ConfigJSON<T> extends Config {
     }
 
     @Override
-    public void save(String config) {
+    public void save() {
         saveFile(GSON.toJson(instance));
     }
 }

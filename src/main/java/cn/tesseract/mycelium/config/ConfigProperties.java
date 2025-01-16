@@ -17,11 +17,11 @@ public abstract class ConfigProperties extends Config {
 
     public void read() {
         loadProperties(readFile());
-        save(toProperties());
+        save();
     }
 
-    public void save(String s) {
-        saveFile(s);
+    public void save() {
+        saveFile(toProperties());
     }
 
     public void load(Field f, Class<?> c, String n, String v) {

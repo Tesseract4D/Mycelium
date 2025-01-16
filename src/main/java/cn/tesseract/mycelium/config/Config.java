@@ -21,7 +21,7 @@ public abstract class Config {
 
     public abstract void read();
 
-    public abstract void save(String config);
+    public abstract void save();
 
     public String readFile() {
         if (file.exists())
