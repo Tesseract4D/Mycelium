@@ -15,15 +15,8 @@ public class HookContainerParser {
     private String currentMethodDesc;
     private boolean currentMethodPublicStatic;
 
-    /*
-    Ключ - название значения аннотации
-     */
     private HashMap<String, Object> annotationValues;
 
-    /*
-    Ключ - номер параметра, значение - номер локальной переменной для перехвата
-    или -1 для перехвата значения наверху стека.
-     */
     private HashMap<Integer, Integer> parameterAnnotations = new HashMap<Integer, Integer>();
 
     private boolean inHookAnnotation;
@@ -147,7 +140,6 @@ public class HookContainerParser {
             }
         }
 
-        // setReturnCondition и setReturnValue сетают тип хук-метода, поэтому сетнуть его вручную можно только теперь
         builder.setHookMethodReturnType(methodType.getReturnType());
 
         if (returnCondition == ReturnCondition.ON_TRUE && methodType.getReturnType() != Type.BOOLEAN_TYPE) {

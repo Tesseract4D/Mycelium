@@ -7,10 +7,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
 
-/**
- * Класс, непосредственно вставляющий хук в метод.
- * Чтобы указать конкретное место вставки хука, нужно создать класс extends HookInjector.
- */
 public abstract class HookInjectorMethodVisitor extends AdviceAdapter {
 
     protected final AsmHook hook;
@@ -29,9 +25,6 @@ public abstract class HookInjectorMethodVisitor extends AdviceAdapter {
         this.methodType = Type.getMethodType(desc);
     }
 
-    /**
-     * Вставляет хук в байткод.
-     */
     protected final void visitHook() {
         if (!cv.visitingHook) {
             cv.visitingHook = true;
@@ -45,9 +38,6 @@ public abstract class HookInjectorMethodVisitor extends AdviceAdapter {
         return mv;
     }
 
-    /**
-     * Вставляет хук в начале метода.
-     */
     public static class MethodEnter extends HookInjectorMethodVisitor {
 
         public MethodEnter(MethodVisitor mv, int access, String name, String desc,
@@ -62,9 +52,6 @@ public abstract class HookInjectorMethodVisitor extends AdviceAdapter {
 
     }
 
-    /**
-     * Вставляет хук на каждом выходе из метода, кроме выходов через throw.
-     */
     public static class MethodExit extends HookInjectorMethodVisitor {
 
         public MethodExit(MethodVisitor mv, int access, String name, String desc,
@@ -80,9 +67,6 @@ public abstract class HookInjectorMethodVisitor extends AdviceAdapter {
         }
     }
 
-    /**
-     * Вставляет хук по номеру строки.
-     */
     public static class LineNumber extends HookInjectorMethodVisitor {
 
         private int lineNumber;

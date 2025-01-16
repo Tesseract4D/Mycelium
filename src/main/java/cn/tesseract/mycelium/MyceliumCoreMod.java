@@ -4,9 +4,9 @@ import cn.tesseract.mycelium.asm.minecraft.HookLibPlugin;
 import cn.tesseract.mycelium.asm.minecraft.HookLoader;
 import cn.tesseract.mycelium.asm.minecraft.PrimaryClassTransformer;
 import cn.tesseract.mycelium.hook.BlackBlockHook;
-import cn.tesseract.mycelium.hook.NoclipHook;
 import cn.tesseract.mycelium.hook.FastLangHook;
 import cn.tesseract.mycelium.hook.ForgeEventHook;
+import cn.tesseract.mycelium.hook.NoclipHook;
 import cn.tesseract.mycelium.lua.LuaHookLib;
 import cn.tesseract.mycelium.lua.LuaHookTransformer;
 import cn.tesseract.mycelium.lua.LuaLogger;
@@ -20,7 +20,6 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -87,10 +86,11 @@ public class MyceliumCoreMod extends HookLoader {
                 for (MethodNode method : node.methods) {
                     if (HookLibPlugin.getMethodMcpName(method.name).equals("elementClicked"))
                         for (int i = 0; i < method.instructions.size(); i++) {
-                            AbstractInsnNode insn = method.instructions.get(i);
-                            if (insn instanceof MethodInsnNode minsn)
-                                if (HookLibPlugin.getMethodMcpName(minsn.name).equals("refreshResources"))
-                                    minsn.name = "reloadLanguage";
+                            if (method.instructions.get(i) instanceof MethodInsnNode insn)
+                                if (HookLibPlugin.getMethodMcpName(insn.name).equals("refreshResources")) {
+                                    insn.name = "reloadLanguage";
+                                    break;
+                                }
                         }
                 }
             });
