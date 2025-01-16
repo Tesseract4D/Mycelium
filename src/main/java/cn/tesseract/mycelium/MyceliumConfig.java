@@ -1,6 +1,5 @@
 package cn.tesseract.mycelium;
 
-import cn.tesseract.mycelium.config.Comment;
 import cn.tesseract.mycelium.config.ConfigProperties;
 
 public class MyceliumConfig extends ConfigProperties {

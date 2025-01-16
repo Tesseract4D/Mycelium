@@ -1,16 +1,18 @@
 package cn.tesseract.mycelium.config;
 
 import java.io.File;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
 public abstract class ConfigProperties extends Config {
     public ConfigProperties(File file) {
-        super(file, "");
+        super(file);
     }
 
     public ConfigProperties(String file) {
-        super(file + ".properties", "");
+        super(file + ".properties");
     }
 
     public void read() {
