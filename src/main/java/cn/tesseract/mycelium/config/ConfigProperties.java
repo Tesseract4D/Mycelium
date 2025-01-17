@@ -2,6 +2,7 @@ package cn.tesseract.mycelium.config;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 
 public abstract class ConfigProperties extends Config {
@@ -56,7 +57,7 @@ public abstract class ConfigProperties extends Config {
         Field[] fields = this.getClass().getDeclaredFields();
         HashMap<String, Field> map = new HashMap<>();
         for (Field field : fields)
-            if (field.canAccess(this))
+            if (Modifier.isPublic(field.getModifiers()))
                 map.put(field.getName(), field);
         for (String line : ct.split("\n")) {
             String t = line.trim();
@@ -76,7 +77,7 @@ public abstract class ConfigProperties extends Config {
         Field[] fields = this.getClass().getDeclaredFields();
         StringBuilder ct = new StringBuilder();
         for (Field field : fields) {
-            if (field.canAccess(this))
+            if (Modifier.isPublic(field.getModifiers()))
                 try {
                     if (ct.length() != 0)
                         ct.append("\n");

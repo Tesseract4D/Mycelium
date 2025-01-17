@@ -35,7 +35,7 @@ public enum Direction {
 	}
 
 	public static Direction fromIndex(int index) {
-		if (index < 0 && index >= ALL.length) {
+		if (index < 0 || index >= ALL.length) {
 			return null;
 		}
 
