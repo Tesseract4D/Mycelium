@@ -1,40 +1,26 @@
 package cn.tesseract.mycelium.util;
 
-public class BlockPos {
+import org.joml.Vector3i;
 
-    public final int x;
-    public final int y;
-    public final int z;
-
+public class BlockPos extends Vector3i {
     public BlockPos(int x, int y, int z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        super(x, y, z);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof BlockPos pos) {
-            return pos.x == x && pos.y == y && pos.z == z;
-        }
-        return false;
+    public BlockPos() {
     }
 
-    @Override
-    public int hashCode() {
-        return x + 31 * (y + 31 * z);
+    public void offset(Direction dir) {
+         offset(dir, 1);
     }
 
-
-    public BlockPos offset(Direction dir) {
-        return offset(dir, 1);
+    public void offset(Direction dir, int dist) {
+        offset(dist * dir.offsetX, dist * dir.offsetY, dist * dir.offsetZ);
     }
 
-    public BlockPos offset(Direction dir, int dist) {
-        return offset(dist * dir.offsetX, dist * dir.offsetY, dist * dir.offsetZ);
-    }
-
-    public BlockPos offset(int offsetX, int offsetY, int offsetZ) {
-        return new BlockPos(x + offsetX, y + offsetY, z + offsetZ);
+    public void offset(int offsetX, int offsetY, int offsetZ) {
+        this.x += offsetX;
+        this.y += offsetY;
+        this.z += offsetZ;
     }
 }
