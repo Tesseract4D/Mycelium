@@ -1,11 +1,14 @@
 package cn.tesseract.mycelium.config;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.File;
 
 public abstract class ConfigJSON<T> extends Config {
-    public static final Gson GSON = new Gson();
+    public static final Gson GSON = new GsonBuilder()
+            .setPrettyPrinting()
+            .create();
     public final Class<T> clazz;
     public T instance;
 
