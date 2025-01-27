@@ -3,6 +3,8 @@ package cn.tesseract.mycelium;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -17,13 +19,16 @@ public class Mycelium {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
+
     @SubscribeEvent
+    @SideOnly(Side.CLIENT)
     public void onRenderBlockOverlay(RenderBlockOverlayEvent e) {
         if (e.player.noClip)
             e.setCanceled(true);
     }
 
     @SubscribeEvent
+    @SideOnly(Side.CLIENT)
     public void onBlockHighlight(DrawBlockHighlightEvent e) {
         if (e.player.isEntityInsideOpaqueBlock())
             e.setCanceled(true);
