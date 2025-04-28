@@ -31,7 +31,7 @@ public class LuaHookClassVisitor {
 
         byte[] bytecode = cw.toByteArray();
 
-        if (MyceliumCoreMod.dumpTransformedClass)
+        if (MyceliumCoreMod.config.dumpClass)
             MyceliumCoreMod.dumpClassFile(bytecode);
 
         return bytecode;

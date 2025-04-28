@@ -3,10 +3,7 @@ package cn.tesseract.mycelium;
 import cn.tesseract.mycelium.asm.minecraft.HookLibPlugin;
 import cn.tesseract.mycelium.asm.minecraft.HookLoader;
 import cn.tesseract.mycelium.asm.minecraft.PrimaryClassTransformer;
-import cn.tesseract.mycelium.hook.BlackBlockHook;
-import cn.tesseract.mycelium.hook.FastLangHook;
-import cn.tesseract.mycelium.hook.ForgeEventHook;
-import cn.tesseract.mycelium.hook.NoclipHook;
+import cn.tesseract.mycelium.hook.*;
 import cn.tesseract.mycelium.lua.LuaAccessTransformer;
 import cn.tesseract.mycelium.lua.LuaBridge;
 import cn.tesseract.mycelium.lua.LuaHookRegistry;
@@ -32,7 +29,6 @@ import java.lang.reflect.Array;
 
 public class MyceliumCoreMod extends HookLoader {
     public static MyceliumConfig config = new MyceliumConfig();
-    public static boolean dumpTransformedClass = true;
     public static final Globals globals = new Globals();
 
     public static final Logger logger = LogManager.getLogger("Lua");
@@ -184,16 +180,18 @@ public class MyceliumCoreMod extends HookLoader {
                 }
             });
         }
+        if (config.biomeInfo)
+            registerHookContainer(BiomeInfoHook.class.getName());
         registerHookContainer(ForgeEventHook.class.getName());
-        File mainScript = new File(scriptDir, "main.lua");
-        if (mainScript.exists()) {
-            try {
-                globals.load(new FileReader(mainScript), mainScript.getName()).call();
-                LuaBridge.reload(true);
-                Class.forName(LuaHookTransformer.luaHookClass);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        for (File file : scriptDir.listFiles()) {
+            if (file.isFile() && file.getName().endsWith(".lua"))
+                try {
+                    globals.load(new FileReader(file), file.getName()).call();
+                    LuaBridge.reload(true);
+                    Class.forName(LuaHookTransformer.luaHookClass);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
         }
     }
 
