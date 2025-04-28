@@ -1,6 +1,7 @@
 package cn.tesseract.mycelium.config;
 
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.world.gen.feature.WorldGenBlockBlob;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;

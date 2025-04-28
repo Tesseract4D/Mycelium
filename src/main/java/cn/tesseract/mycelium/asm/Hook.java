@@ -1,7 +1,6 @@
 package cn.tesseract.mycelium.asm;
 
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
@@ -20,11 +19,7 @@ public @interface Hook {
 
     boolean isMandatory() default false;
 
-    boolean injectOnExit() default false;
-
-    int injectOnLine() default -1;
-
-    String injectOnInvoke() default "";
+    String injector() default "";
 
     String returnAnotherMethod() default "";
 
@@ -50,7 +45,7 @@ public @interface Hook {
 
     @Target(ElementType.PARAMETER)
     @interface LocalVariable {
-        int index();
+        int value();
     }
 
     @Target(ElementType.PARAMETER)

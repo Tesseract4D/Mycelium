@@ -4,12 +4,6 @@ import org.objectweb.asm.ClassWriter;
 
 import java.util.ArrayList;
 
-/**
- * ClassWriter с другой реализацией метода getCommonSuperClass: при его использовании не происходит загрузки классов.
- * Однако, сама по себе загрузка классов редко является проблемой, потому что инициализация класса (вызов статических
- * блоков) происходит не при загрузке класса. Проблемы появляются, когда хуки вставляются в зависимые друг от друга
- * классы, тогда стандартная реализация отваливается с ClassCircularityError.
- */
 public class SafeClassWriter extends ClassWriter {
 
     private final ClassMetadataReader classMetadataReader;
@@ -31,6 +25,4 @@ public class SafeClassWriter extends ClassWriter {
             return superClasses1.get(i - 1);
         }
     }
-
-
 }

@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class HookClassTransformer implements ClassFileTransformer {
-
     public HookLogger logger = new HookLogger.SystemOutLogger();
     public HashMap<String, List<AsmHook>> hooksMap = new HashMap<>();
     public final HookContainerParser containerParser = new HookContainerParser(this);
@@ -33,7 +32,6 @@ public class HookClassTransformer implements ClassFileTransformer {
         containerParser.parseHooks(className);
     }
 
-    @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
         return transform(className.replace('/', '.'), classfileBuffer);
     }
@@ -47,7 +45,6 @@ public class HookClassTransformer implements ClassFileTransformer {
             try {
                 int majorVersion = ((bytecode[6] & 0xFF) << 8) | (bytecode[7] & 0xFF);
                 boolean java7 = majorVersion > 50;
-
 
                 ClassReader cr = new ClassReader(bytecode);
                 ClassWriter cw = createClassWriter(java7 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS);

@@ -36,5 +36,5 @@
 dependencies {
     runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.5.4-GTNH:dev")
 
-    shadowImplementation("org.joml:joml:1.10.5")
+    compileOnly 'org.apache.bcel:bcel:6.10.0'
 }

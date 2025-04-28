@@ -7,7 +7,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MovingObjectPosition;
 
 public class NoclipHook {
-    @Hook(injectOnExit = true)
+    @Hook(injector = "exit")
     public static void onUpdate(EntityPlayer c) {
         c.noClip = c.capabilities.isFlying && (MyceliumCoreMod.config.survivalNoclip || c.capabilities.isCreativeMode);
     }

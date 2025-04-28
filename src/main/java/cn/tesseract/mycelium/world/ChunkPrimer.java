@@ -22,15 +22,11 @@ public class ChunkPrimer {
         this.data[getBlockIndex(x, y, z)] = block;
     }
 
-    private static int getBlockIndex(int x, int y, int z)
+    public static int getBlockIndex(int x, int y, int z)
     {
         return x << 12 | z << 8 | y;
     }
 
-    /**
-     * Counting down from the highest block in the sky, find the first non-air block for the given location
-     * (actually, looks like mostly checks x, z+1? And actually checks only the very top sky block of actual x, z)
-     */
     public int findGroundBlockIdx(int x, int z)
     {
         int i = (x << 12 | z << 8) + 256 - 1;

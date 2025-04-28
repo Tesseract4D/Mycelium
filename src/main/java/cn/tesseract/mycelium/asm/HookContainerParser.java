@@ -81,8 +81,6 @@ public class HookContainerParser {
         builder.setHookMethod(currentMethodName);
         builder.addThisToHookMethodParameters();
 
-        boolean injectOnExit = Boolean.TRUE.equals(annotationValues.get("injectOnExit"));
-
         int currentParameterId = 1;
         for (int i = 1; i < argumentTypes.length; i++) {
             Type argType = argumentTypes[i];
@@ -102,18 +100,27 @@ public class HookContainerParser {
         }
 
 
-        boolean injectOnLine = false;
-        int line = -2;
-        if (annotationValues.containsKey("injectOnLine")) {
-            injectOnLine = true;
-            line = (int) annotationValues.get("injectOnLine");
-        }
+        if (annotationValues.containsKey("injector")) {
+            String injector = (String) annotationValues.get("injector");
+            int i = injector.indexOf(':');
 
-        if (annotationValues.containsKey("injectOnInvoke")) {
-            builder.setInjectorFactory(new HookInjectorFactory.Invoke((String) annotationValues.get("injectOnInvoke"), annotationValues.containsKey("injectOnLine") ? line : -2, injectOnExit));
-        } else if (injectOnLine) {
-            builder.setInjectorFactory(new HookInjectorFactory.LineNumber(line));
-        } else if (injectOnExit) builder.setInjectorFactory(AsmHook.ON_EXIT_FACTORY);
+            if (i == -1)
+                builder.setInjectorFactory(HookInjectorFactory.getFactory(injector));
+            else {
+                String id = injector.substring(0, i);
+                String[] values = injector.substring(i + 1).split(",");
+                if (id.equals("class")) {
+                    try {
+                        builder.setInjectorFactory((HookInjectorFactory) Class.forName(values[0]).getConstructor().newInstance());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    builder.setInjectorFactory(HookInjectorFactory.getFactory(id));
+                }
+                builder.setInjectorSettings(values);
+            }
+        }
 
         if (annotationValues.containsKey("returnType")) {
             builder.setTargetMethodReturnType((String) annotationValues.get("returnType"));

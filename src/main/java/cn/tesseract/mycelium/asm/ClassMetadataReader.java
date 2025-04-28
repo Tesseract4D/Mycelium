@@ -8,24 +8,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 
-/**
- * Позволяет при помощи велосипеда из костылей искать методы внутри незагруженных классов
- * и общие суперклассы для чего угодно. Работает через поиск class-файлов в classpath, и, в случае провала -
- * ищет через рефлексию. Для работы с майнкрафтом используется сабкласс под названием DeobfuscationMetadataReader,
- *
- */
 public class ClassMetadataReader {
-    private static Method m;
-
-    static {
-        try {
-            m = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
-            m.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-    }
-
     public byte[] getClassData(String className) throws IOException {
         String classResourceName = '/' + className.replace('.', '/') + ".class";
         return IOUtils.toByteArray(ClassMetadataReader.class.getResourceAsStream(classResourceName));
@@ -41,7 +24,7 @@ public class ClassMetadataReader {
 
     public MethodReference findVirtualMethod(String owner, String name, String desc) {
         ArrayList<String> superClasses = getSuperClasses(owner);
-        for (int i = superClasses.size() - 1; i > 0; i--) { // чекать текущий класс смысла нет
+        for (int i = superClasses.size() - 1; i > 0; i--) {
             String className = superClasses.get(i);
             MethodReference methodReference = getMethodReference(className, name, desc);
             if (methodReference != null) {
@@ -85,10 +68,6 @@ public class ClassMetadataReader {
         return sourceName.equals(targetName) && sourceDesc.equals(targetDesc);
     }
 
-    /**
-     * Возвращает суперклассы в порядке возрастающей конкретности (начиная с java/lang/Object
-     * и заканчивая данным типом)
-     */
     public ArrayList<String> getSuperClasses(String type) {
         ArrayList<String> superclasses = new ArrayList<String>(1);
         superclasses.add(type);
@@ -100,13 +79,11 @@ public class ClassMetadataReader {
     }
 
     private Class getLoadedClass(String type) {
-        if (m != null) {
-            try {
-                ClassLoader classLoader = ClassMetadataReader.class.getClassLoader();
-                return (Class) m.invoke(classLoader, type.replace('/', '.'));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        try {
+            ClassLoader classLoader = ClassMetadataReader.class.getClassLoader();
+            return Class.forName(type.replace('/', '.'), false, classLoader);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -188,12 +165,13 @@ public class ClassMetadataReader {
             return Type.getMethodType(desc);
         }
 
-        @Override public String toString() {
+        @Override
+        public String toString() {
             return "MethodReference{" +
-                "owner='" + owner + '\'' +
-                ", name='" + name + '\'' +
-                ", desc='" + desc + '\'' +
-                '}';
+                    "owner='" + owner + '\'' +
+                    ", name='" + name + '\'' +
+                    ", desc='" + desc + '\'' +
+                    '}';
         }
     }
 

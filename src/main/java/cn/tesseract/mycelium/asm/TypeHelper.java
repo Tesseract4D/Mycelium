@@ -6,10 +6,6 @@ import org.objectweb.asm.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Класс, позволяющий создавать типы из разных входных данных.
- * Эти типы нужны для того, чтобы задавать параметры и возвращаемые значения методов.
- */
 public class TypeHelper {
 
     private static final Map<String, Type> primitiveTypes = new HashMap<String, Type>(9);
@@ -26,40 +22,18 @@ public class TypeHelper {
         primitiveTypes.put("double", Type.DOUBLE_TYPE);
     }
 
-    /**
-     * Создает тип по названию класса или примитива.
-     * Пример использования: getType("net.minecraft.world.World") - вернёт тип для World
-     *
-     * @param className необфусцированное название класса
-     * @return соответствующий тип
-     */
     public static Type getType(String className) {
         return getArrayType(className, 0);
     }
 
-    /**
-     * Создает тип для одномерного массива указанного класса или примитиа.
-     * Пример использования: getArrayType("net.minecraft.world.World") - вернёт тип для World[]
-     *
-     * @param className необфусцированное название класса
-     * @return соответствующий классу тип одномерного массива
-     */
     public static Type getArrayType(String className) {
         return getArrayType(className, 1);
     }
 
-    /**
-     * Создает тип для n-мерного массива указанного класса или примитива.
-     * Пример использования: getArrayType("net.minecraft.world.World", 2) - вернёт тип для World[][]
-     *
-     * @param className название класса
-     * @return соответствующий классу тип n-мерного массива
-     */
     public static Type getArrayType(String className, int arrayDimensions) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < arrayDimensions; i++) {
+        for (int i = 0; i < arrayDimensions; i++)
             sb.append("[");
-        }
         Type primitive = primitiveTypes.get(className);
         if (primitive == null) {
             sb.append("L");

@@ -13,7 +13,7 @@ public class BlackBlockHook {
         OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
     }
 
-    @Hook(injectOnExit = true, targetMethod = "func_147044_g")
+    @Hook(injector = "exit", targetMethod = "func_147044_g")
     public static void func_147044_g$1(InventoryEffectRenderer c) {
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glPopMatrix();

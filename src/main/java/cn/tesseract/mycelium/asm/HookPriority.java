@@ -1,11 +1,9 @@
 package cn.tesseract.mycelium.asm;
 
 public enum HookPriority {
-
-    HIGHEST, // Вызывается первым
+    HIGHEST,
     HIGH,
     NORMAL,
     LOW,
-    LOWEST // Вызывается последним
-
+    LOWEST
 }
