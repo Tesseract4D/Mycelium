@@ -52,7 +52,7 @@ public class HookClassTransformer implements ClassFileTransformer {
                 cr.accept(hooksWriter, java7 ? ClassReader.SKIP_FRAMES : ClassReader.EXPAND_FRAMES);
                 bytecode = cw.toByteArray();
 
-                if (MyceliumCoreMod.dumpTransformedClass)
+                if (MyceliumCoreMod.config.dumpClass)
                     MyceliumCoreMod.dumpClassFile(bytecode);
 
                 for (AsmHook hook : hooksWriter.injectedHooks) {

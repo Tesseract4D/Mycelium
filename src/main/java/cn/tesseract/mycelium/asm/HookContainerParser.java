@@ -109,15 +109,8 @@ public class HookContainerParser {
             else {
                 String id = injector.substring(0, i);
                 String[] values = injector.substring(i + 1).split(",");
-                if (id.equals("class")) {
-                    try {
-                        builder.setInjectorFactory((HookInjectorFactory) Class.forName(values[0]).getConstructor().newInstance());
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    builder.setInjectorFactory(HookInjectorFactory.getFactory(id));
-                }
+
+                builder.setInjectorFactory(HookInjectorFactory.getFactory(id));
                 builder.setInjectorSettings(values);
             }
         }

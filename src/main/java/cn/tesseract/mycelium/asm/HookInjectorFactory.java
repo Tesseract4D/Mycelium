@@ -9,11 +9,12 @@ import java.util.Map;
 
 public abstract class HookInjectorFactory {
     private static final Map<String, HookInjectorFactory> factories = new HashMap<>();
+
     public boolean isPriorityInverted;
 
-    public static HookInjectorFactory enter;
+    public static final HookInjectorFactory enter;
 
-    public static HookInjectorFactory exit;
+    public static final HookInjectorFactory exit;
 
     public abstract HookInjector create(MethodVisitor mv, int access, String name, String desc, AsmHook hook, HookInjectorClassVisitor cv, String... args);
 

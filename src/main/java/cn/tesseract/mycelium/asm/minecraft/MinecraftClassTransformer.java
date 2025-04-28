@@ -61,7 +61,7 @@ public class MinecraftClassTransformer extends HookClassTransformer implements I
             classNode.accept(classWriter);
 
             bytecode = classWriter.toByteArray();
-            if (MyceliumCoreMod.dumpTransformedClass)
+            if (MyceliumCoreMod.config.dumpClass)
                 MyceliumCoreMod.dumpClassFile(bytecode);
         }
 
