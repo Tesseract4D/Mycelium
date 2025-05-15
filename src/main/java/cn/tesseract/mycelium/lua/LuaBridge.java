@@ -49,11 +49,11 @@ public class LuaBridge {
         if (!startup) {
             for (LuaHookContainer fc : hookList)
                 fc.error = true;
-            for (ArrayList<LuaValue> list : LuaBridge.eventList.values())
-                list.clear();
+            LuaBridge.eventList.forEach((k, v) -> {
+                if (!k.equals("reload")) v.clear();
+            });
         }
-        LuaValue func = MyceliumCoreMod.globals.get("reload");
-        if (func != LuaValue.NIL) func.call(LuaBoolean.valueOf(startup));
+        callLuaEvent("reload", LuaBoolean.valueOf(startup));
         reloading = false;
     }
 

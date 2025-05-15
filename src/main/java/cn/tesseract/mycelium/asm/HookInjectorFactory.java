@@ -1,5 +1,6 @@
 package cn.tesseract.mycelium.asm;
 
+import cn.tesseract.mycelium.asm.minecraft.HookLibPlugin;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -56,7 +57,7 @@ public abstract class HookInjectorFactory {
                     @Override
                     public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
                         boolean isTarget = false;
-                        if (method.equals("L" + owner + ";" + name + desc))
+                        if (method.equals("L" + owner + ";" + name + desc) || method.equals("L" + owner + ";" + HookLibPlugin.getMethodMcpName(name) + desc))
                             if (index != -1 && (index == -2 || index-- == 0)) {
                                 isTarget = true;
                             }
@@ -79,7 +80,7 @@ public abstract class HookInjectorFactory {
 
                     @Override
                     public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-                        if (method.equals(name))
+                        if (method.equals(name) || method.equals(HookLibPlugin.getMethodMcpName(name)))
                             if (index != -1 && (index == -2 || index-- == 0))
                                 visitHook();
                         super.visitMethodInsn(opcode, owner, name, desc, itf);
@@ -102,36 +103,19 @@ public abstract class HookInjectorFactory {
                 };
             }
         });
-        registerFactory("load", new HookInjectorFactory() {
+        registerFactory("opcode", new HookInjectorFactory() {
             @Override
             public HookInjector create(MethodVisitor mv, int access, String name, String desc, AsmHook hook, HookInjectorClassVisitor cv, String... args) {
                 return new HookInjector(mv, access, name, desc, hook, cv) {
-                    final int local = Integer.parseInt(args[0]);
+                    final int opcode = Integer.parseInt(args[0]);
                     int index = args.length > 1 ? Integer.parseInt(args[1]) : -2;
 
                     @Override
-                    public void visitVarInsn(int opcode, int varIndex) {
-                        if (21 <= opcode && opcode <= 25 && varIndex == local)
+                    public void visitInsn(int opcode) {
+                        if (opcode == this.opcode)
                             if (index != -1 && (index == -2 || index-- == 0))
                                 visitHook();
-                        super.visitVarInsn(opcode, varIndex);
-                    }
-                };
-            }
-        });
-        registerFactory("store", new HookInjectorFactory() {
-            @Override
-            public HookInjector create(MethodVisitor mv, int access, String name, String desc, AsmHook hook, HookInjectorClassVisitor cv, String... args) {
-                return new HookInjector(mv, access, name, desc, hook, cv) {
-                    final int local = Integer.parseInt(args[0]);
-                    int index = args.length > 1 ? Integer.parseInt(args[1]) : -2;
-
-                    @Override
-                    public void visitVarInsn(int opcode, int varIndex) {
-                        super.visitVarInsn(opcode, varIndex);
-                        if (54 <= opcode && opcode <= 58 && varIndex == local)
-                            if (index != -1 && (index == -2 || index-- == 0))
-                                visitHook();
+                        super.visitInsn(opcode);
                     }
                 };
             }

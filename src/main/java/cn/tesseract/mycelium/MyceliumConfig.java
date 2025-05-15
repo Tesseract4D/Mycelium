@@ -16,6 +16,8 @@ public class MyceliumConfig extends ConfigProperties {
     public boolean fastLang = true;
     @Comment("Dump biome ids and classes to /biomes.txt .")
     public boolean biomeInfo = false;
+    @Comment("Fixes the \"java.lang.RuntimeException: Already decorating!!\" crash commonly occurring with a lot of heavy worldgen mods installed.")
+    public boolean biomeDecorationFix = true;
 
     public MyceliumConfig() {
         super("mycelium");

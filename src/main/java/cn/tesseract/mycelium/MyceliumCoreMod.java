@@ -118,21 +118,21 @@ public class MyceliumCoreMod extends HookLoader {
                 }
             }
         });
-        globals.set("registerLuaHook", new VarArgFunction() {
+        globals.set("registerHook", new VarArgFunction() {
             @Override
             public Varargs invoke(Varargs args) {
                 LuaHookRegistry.registerLuaHook(args.arg1().tojstring(), args.arg(2), args.arg(3).checktable());
                 return NONE;
             }
         });
-        globals.set("registerLuaEvent", new TwoArgFunction() {
+        globals.set("registerEvent", new TwoArgFunction() {
             @Override
             public LuaValue call(LuaValue arg1, LuaValue arg2) {
                 LuaHookRegistry.registerLuaEvent(arg1.tojstring(), arg2);
                 return NONE;
             }
         });
-        globals.set("registerLuaTransformer", new TwoArgFunction() {
+        globals.set("registerTransformer", new TwoArgFunction() {
             @Override
             public LuaValue call(LuaValue arg1, LuaValue arg2) {
                 LuaHookRegistry.registerLuaTransformer(arg1.tojstring(), arg2);
@@ -182,6 +182,8 @@ public class MyceliumCoreMod extends HookLoader {
         }
         if (config.biomeInfo)
             registerHookContainer(BiomeInfoHook.class.getName());
+        if (config.biomeDecorationFix)
+            registerHookContainer(AlreadyDecoHook.class.getName());
         registerHookContainer(ForgeEventHook.class.getName());
         for (File file : scriptDir.listFiles()) {
             if (file.isFile() && file.getName().endsWith(".lua"))

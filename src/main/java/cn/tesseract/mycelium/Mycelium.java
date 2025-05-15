@@ -1,6 +1,8 @@
 package cn.tesseract.mycelium;
 
+import cn.tesseract.mycelium.command.CommandLoad;
 import cn.tesseract.mycelium.command.CommandReload;
+import cn.tesseract.mycelium.event.AFEventHandler;
 import cn.tesseract.mycelium.hook.BiomeInfoHook;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
@@ -25,12 +27,15 @@ public class Mycelium {
 
     @Mod.EventHandler
     public void server(FMLServerStartingEvent e) {
+        e.registerServerCommand(new CommandLoad());
         e.registerServerCommand(new CommandReload());
     }
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent e) {
         MinecraftForge.EVENT_BUS.register(this);
+        if (MyceliumCoreMod.config.biomeDecorationFix)
+            MinecraftForge.EVENT_BUS.register(new AFEventHandler());
     }
 
     @Mod.EventHandler
